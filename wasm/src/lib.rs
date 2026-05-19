@@ -39,7 +39,7 @@ impl Scanner {
     pub fn scan_range(&self, start: u32, end: u32) -> Vec<u32> {
         let mut results = Vec::with_capacity(MAX_MATCHES);
         let mask = self.mask;
-        let target = self.target;
+        let masked_target = self.target & mask;
 
         let mut buf = [b'0'; BUF_SIZE];
         let mut itoa_buf = itoa::Buffer::new();
@@ -51,7 +51,7 @@ impl Scanner {
             let hash_bytes: [u8; 16] = Md5::digest(&buf[BUF_SIZE - len..]).into();
             let hash_u128 = u128::from_be_bytes(hash_bytes);
 
-            if (hash_u128 & mask) == target {
+            if (hash_u128 & mask) == masked_target {
                 results.push(id);
                 if results.len() >= MAX_MATCHES {
                     break;
