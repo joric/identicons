@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MD5 Finder</title>
+    <script type="module" src="main.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input, button { padding: 5px; margin-right: 10px; width: 250px;}
+        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <label>Max ID: <input id="maxId" value="300000000" style="width:100px;"></label><br><br>
+    
+    <label>Target Hex: <input id="target" value="00000000000000000000000000000000"></label><br><br>
+    
+    <label>Mask Hex: &nbsp;&nbsp;<input id="mask" value="ffffff00000000000000000000000000"></label><br><br>
+    
+    <button id="search">Search</button>
+    <pre id="output">Ready.</pre>
+</body>
+</html>
