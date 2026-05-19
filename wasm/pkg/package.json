@@ -1,0 +1,15 @@
+{
+  "name": "md5_scanner",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "md5_scanner_bg.wasm",
+    "md5_scanner.js",
+    "md5_scanner.d.ts"
+  ],
+  "main": "md5_scanner.js",
+  "types": "md5_scanner.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
