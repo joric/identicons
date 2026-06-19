@@ -187,7 +187,7 @@ function processImage(img) {
   // mask should be relaxed because of rgb rounding errors
   // looks like it doesn't work reliably, need specific bruteforcer
   // that will bruteforce all colors and filter by rgb results
-  mask='11111111111111110000000000000000';
+  //mask='11111111111111110000000000000000';
   mask='1111111111111111000000000f808080';
 
   // also there's something shady with pixel mask, I am not getting joric/852547 at all
