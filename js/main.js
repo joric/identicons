@@ -1,3 +1,220 @@
+function find_targets(targetHex, maskHex) {
+  const maxId = 300000000; //300 million users now
+
+  const numThreads = (navigator.hardwareConcurrency || 4) * 2; // 2x oversubscribing
+  const chunkSize = Math.ceil(maxId / numThreads);
+  
+  let completedWorkers = 0;
+  const startTime = performance.now();
+
+  console.log(`starting search, maxId: ${maxId}, target: ${targetHex}, mask: ${maskHex}`);
+
+  const select = document.getElementById('select');
+  select.innerHTML = '<option>Searching...</option>';
+
+  count = 0;
+  results = [];
+
+  for (let i = 0; i < numThreads; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, maxId);
+      if (start >= maxId) break;
+
+      const worker = new Worker('wasm/worker.js', { type: 'module' });
+      
+      worker.onmessage = (e) => {
+
+          if (e.data.result?.length) {
+              //output.appendChild(document.createTextNode(e.data.result.join('\n') + '\n'));
+              //console.log(e.data.result.join('\n'));
+              //e.data.result.map(x=>results.push(String(x)));
+              //console.log(`Collected ${results.length} results...`);
+              //console.log(`Collected ${e.data.result.length} results...`);
+
+              count += e.data.result.length;
+              e.data.result.map(x=>results.push(x));
+          }
+
+          completedWorkers++;
+          worker.terminate();
+
+          if (completedWorkers === numThreads) {
+              const elapsed = performance.now() - startTime;
+              const rate = Math.round((maxId / elapsed) * 1000);
+
+              const stats = `Completed in ${elapsed.toFixed(2)} ms\nRate: ${rate} IDs/sec\n`;
+              //output.appendChild(document.createTextNode(stats));
+
+              console.log(stats);
+
+              console.log('Total results', count);
+
+              for (const id of results.slice(0, 500)) {
+                  const text=String(id);
+                  const option = document.createElement('option');
+                  option.value = text;
+                  option.text = text;
+                  select.appendChild(option);
+              }
+
+              select.options[0].text = `${select.options.length-1} results`;
+              if (select.options.length>1) {
+                select.selectedIndex = 1;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+          }
+      };
+
+      worker.postMessage({ start, end, targetHex, maskHex });
+  }
+
+}
+
+function processImage(img) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 350;
+  canvas.height = 350;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  
+  // Draw image at 350x350 (no border)
+  ctx.drawImage(img, 0, 0, 350, 350);
+  
+  // Read 5x5 grid, each cell 70px
+  const gridSize = 5;
+  const cellSize = 70;
+  const colors = [];
+  
+  for (let row = 0; row < gridSize; row++) {
+    const rowColors = [];
+    for (let col = 0; col < gridSize; col++) {
+      const px = col * cellSize + cellSize/2;
+      const py = row * cellSize + cellSize/2;
+      const pixel = ctx.getImageData(px, py, 1, 1).data;
+      rowColors.push({
+        r: pixel[0],
+        g: pixel[1],
+        b: pixel[2]
+      });
+    }
+    colors.push(rowColors);
+  }
+  console.log(colors);
+
+  let targetColor = 255;
+
+  // Convert to text grid
+  const grid = colors.map(row => 
+    row.map(color => {
+      const brightness = (color.r + color.g + color.b) / 3;
+      if (color.r!=240) targetColor = color;
+      return (brightness == 240 || brightness == 255) ? 0 : 1;
+    }).join('')
+  );
+
+  console.log(grid.join('\n'));
+
+  target='fff00000000000000000000000000000';
+    mask='11111111111111110000000000000000';
+
+  // set lower 15 nibbles to bits
+
+  let targetArr = [...target];
+
+  for (let x=0; x<3; x++) {
+    for (let y=0; y<5; y++) {
+        targetArr[(2-x)*5+y] = grid[y][x]==1 ? '0':'f';
+    }
+  }
+
+  target = targetArr.join('');
+
+  //The top 6 set an HLS color (12 bits hue, 8 lightness, 8 saturation)
+
+  function rgbToHls(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const M = Math.max(r, g, b), m = Math.min(r, g, b);
+      const l = (M + m) / 2;
+      const d = M - m;
+      if (d === 0) return [0, l, 0];
+      const s = l > 0.5 ? d / (2 - M - m) : d / (M + m);
+      let h = M === r ? (g - b) / d + (g < b ? 6 : 0) :
+              M === g ? (b - r) / d + 2 :
+              (r - g) / d + 4;
+      return [h / 6, l, s];
+  }
+
+  console.log('target color', targetColor);
+
+  [h,l,s] = rgbToHls(targetColor.r, targetColor.g, targetColor.b);
+
+  function encode_hls(h,l,s) {
+    const h_enc = Math.round(h * 4096);        // 0.639892578125 * 4096 = 2621
+    const l_enc = 960 - Math.floor(l * 1280); // 960 - floor(0.74453125 * 1280) = 960 - 953 = 7
+    const s_enc = 832 - Math.floor(s * 1280); // 832 - floor(0.4796875 * 1280) = 832 - 614 = 218
+    return [h_enc, l_enc, s_enc];
+  }
+
+  [h,l,s] = encode_hls(h,l,s);
+
+
+  function hexToNibbles(hex) {
+      return Array.from(hex).map(c => parseInt(c, 16));
+  }
+
+  function nibblesToHex(nibbles) {
+      return nibbles.map(n => n.toString(16)).join('');
+  }
+
+  let nibbles = hexToNibbles(target);
+
+  nibbles[25] = (h >> 8) & 0x0F;     // High nibble (bits 8-11)
+  nibbles[26] = (h >> 4) & 0x0F;     // Middle nibble (bits 4-7)
+  nibbles[27] = h & 0x0F;            // Low nibble (bits 0-3)
+        
+  // s is 8 bits -> 2 nibbles at positions 28, 29
+  nibbles[28] = (s >> 4) & 0x0F;     // High nibble
+  nibbles[29] = s & 0x0F;            // Low nibble
+
+  // l is 8 bits -> 2 nibbles at positions 30, 31
+  nibbles[30] = (l >> 4) & 0x0F;     // High nibble
+  nibbles[31] = l & 0x0F;            // Low nibble
+
+  target = nibblesToHex(nibbles);
+
+  console.log('target', target);
+
+  // mask should be relaxed because of rgb rounding errors
+  mask='1111111111111111000000000fe0e0e0';
+
+  find_targets(target, mask);
+}
+
+function upload_image() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+
+  input.onchange = function() {
+    const file = this.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        processImage(img);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    this.remove();
+  };
+  
+  document.body.appendChild(input);
+  input.click();
+}
+
 async function getId(username) {
   const url = `https://api.github.com/users/${username}`;
   console.log('fetching', url);
@@ -115,7 +332,8 @@ window.onload = function() {
   select_ctrl.onchange = (e)=> {
     let username = e.target.options[e.target.selectedIndex].text;
     let id = e.target.value;
-    if (username) {
+
+    if (username && id && username!=id) {
       uname_ctrl.value = username;
       location.hash = username;
       uid_ctrl.value = id;
@@ -124,8 +342,18 @@ window.onload = function() {
       generate();
       document.getElementById('link').style.visibility = 'visible';
       document.getElementById('link').href=`https://github.com/${username}/`;
-    } else {
-      resetUsername();
+    } else if (id){
+      //resetUsername();
+      document.getElementById('username').value = '';
+      location.hash = id;
+      uid_ctrl.value = id;
+      uid_ctrl.select();
+
+      //select_ctrl.select();
+
+      document.getElementById('fetchBtn').disabled = true;
+      generate();
+      document.getElementById('link').style.visibility = 'hidden';
     }
   }
 

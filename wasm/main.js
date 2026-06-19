@@ -5,8 +5,7 @@ document.getElementById('search').addEventListener('click', () => {
     
     const output = document.getElementById('output');
     const btn = document.getElementById('search');
-    
-    // Очищаем вывод перед новым стартом
+
     output.textContent = "";
     btn.disabled = true;
 
