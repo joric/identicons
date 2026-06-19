@@ -1,5 +1,5 @@
 function find_targets(targetHex, maskHex) {
-  const maxId = 300000000; //300 million users now
+  const maxId = 300_000_000; //300 million users now
 
   const numThreads = (navigator.hardwareConcurrency || 4) * 2; // 2x oversubscribing
   const chunkSize = Math.ceil(maxId / numThreads);
