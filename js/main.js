@@ -187,7 +187,7 @@ function processImage(img) {
   // mask should be relaxed because of rgb rounding errors
   // looks like it doesn't work reliably, need specific bruteforcer
   // that will bruteforce all colors and filter by rgb results
-  mask='1111111111111110000000000f808080';
+  mask='1111111111111110000000000fc0c0c0';
 
   find_targets(target, mask);
 }
