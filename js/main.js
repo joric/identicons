@@ -115,7 +115,7 @@ function processImage(img) {
   console.log(grid.join('\n'));
 
   target='fff00000000000000000000000000000';
-    mask='11111111111111110000000000000000';
+    mask='11111111111111100000000000000000';
 
   // set lower 15 nibbles to bits
 
@@ -187,12 +187,7 @@ function processImage(img) {
   // mask should be relaxed because of rgb rounding errors
   // looks like it doesn't work reliably, need specific bruteforcer
   // that will bruteforce all colors and filter by rgb results
-  //mask='11111111111111110000000000000000';
-  mask='1111111111111111000000000f808080';
-
-  // also there's something shady with pixel mask, I am not getting joric/852547 at all
-  // looks like it is a complete fail
-  // see bruteforcer that works https://gist.github.com/joric/ecf4c6f3c6fe06bbe2cbfcf60d0f42ab
+  mask='1111111111111110000000000f808080';
 
   find_targets(target, mask);
 }
