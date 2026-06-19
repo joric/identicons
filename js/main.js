@@ -184,7 +184,7 @@ function processImage(img) {
   console.log('target', target);
 
   // mask should be relaxed because of rgb rounding errors
-  mask='1111111111111111000000000fe0e0e0';
+  mask='1111111111111111000000000ee0e0e0';
 
   find_targets(target, mask);
 }
