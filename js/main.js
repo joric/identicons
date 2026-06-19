@@ -192,7 +192,7 @@ function processImage(img) {
 
   // also there's something shady with pixel mask, I am not getting joric/852547 at all
   // looks like it is a complete fail
-  // see bruteforcer that works tps://gist.github.com/joric/ecf4c6f3c6fe06bbe2cbfcf60d0f42ab
+  // see bruteforcer that works https://gist.github.com/joric/ecf4c6f3c6fe06bbe2cbfcf60d0f42ab
 
   find_targets(target, mask);
 }
