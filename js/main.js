@@ -49,7 +49,7 @@ function find_targets(targetHex, maskHex) {
 
               console.log('Total results', count);
 
-              for (const id of results.slice(0, 500)) {
+              for (const id of results.sort((a, b) => a - b).slice(0, 500)) {
                   const text=String(id);
                   const option = document.createElement('option');
                   option.value = text;
@@ -58,6 +58,7 @@ function find_targets(targetHex, maskHex) {
               }
 
               select.options[0].text = `${select.options.length-1} results`;
+              select.options[0].value = '';
               if (select.options.length>1) {
                 select.selectedIndex = 1;
                 select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -148,7 +149,7 @@ function processImage(img) {
   [h,l,s] = rgbToHls(targetColor.r, targetColor.g, targetColor.b);
 
   function encode_hls(h,l,s) {
-    const h_enc = Math.round(h * 4096);        // 0.639892578125 * 4096 = 2621
+    const h_enc = Math.floor(h * 4096);        // 0.639892578125 * 4096 = 2621
     const l_enc = 960 - Math.floor(l * 1280); // 960 - floor(0.74453125 * 1280) = 960 - 953 = 7
     const s_enc = 832 - Math.floor(s * 1280); // 832 - floor(0.4796875 * 1280) = 832 - 614 = 218
     return [h_enc, l_enc, s_enc];
@@ -184,7 +185,12 @@ function processImage(img) {
   console.log('target', target);
 
   // mask should be relaxed because of rgb rounding errors
-  mask='1111111111111111000000000ee0e0e0';
+  // looks like it doesn't work reliably, need specific bruteforcer
+  // that will bruteforce all colors and filter by rgb results
+  mask='11111111111111110000000000000000';
+  mask='1111111111111111000000000f808080';
+
+  // also there's something shady with pixel mask, I am not getting joric/852547 at all
 
   find_targets(target, mask);
 }
@@ -347,8 +353,7 @@ window.onload = function() {
       document.getElementById('username').value = '';
       location.hash = id;
       uid_ctrl.value = id;
-      uid_ctrl.select();
-
+      //uid_ctrl.select();
       //select_ctrl.select();
 
       document.getElementById('fetchBtn').disabled = true;
