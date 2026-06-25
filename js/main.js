@@ -293,6 +293,14 @@ function generate() {
   document.getElementById('getName').disabled = document.getElementById('username').value!='';
 }
 
+async function updateLink(username) {
+  if (username) {
+    document.getElementById('link').innerHTML = `<a href="https://github.com/${username}/" target=_blank>https://github.com/${username}/</a>`;
+  } else {
+    document.getElementById('link').innerHTML = `Unknown Username`;
+  }
+}
+
 async function loadUserName() {
   let uname_ctrl = document.getElementById('username');
   let uid_ctrl = document.getElementById('userid');
@@ -302,8 +310,7 @@ async function loadUserName() {
     uname_ctrl.value = username;
     uid_ctrl.value = id;
     generate();
-    document.getElementById('link').style.visibility = 'visible';
-    document.getElementById('link').href=`https://github.com/${username}/`;
+    updateLink(username);
     clearTimeout(timeout);
     location.hash = username;
   } catch (e) {
@@ -319,8 +326,7 @@ async function loadUserAndGenerate(username) {
     uname_ctrl.value = username;
     uid_ctrl.value = id;
     generate();
-    document.getElementById('link').style.visibility = 'visible';
-    document.getElementById('link').href=`https://github.com/${username}/`;
+    updateLink(username);
   } catch (e) {
     alert(e.message);
   }
@@ -343,8 +349,7 @@ window.onload = function() {
       uid_ctrl.select();
       document.getElementById('fetchBtn').disabled = true;
       generate();
-      document.getElementById('link').style.visibility = 'visible';
-      document.getElementById('link').href=`https://github.com/${username}/`;
+      updateLink(username);
     } else if (id){
       //resetUsername();
       document.getElementById('username').value = '';
@@ -355,7 +360,7 @@ window.onload = function() {
 
       document.getElementById('fetchBtn').disabled = true;
       generate();
-      document.getElementById('link').style.visibility = 'hidden';
+      updateLink();
     }
   }
 
@@ -364,7 +369,7 @@ window.onload = function() {
     document.getElementById('fetchBtn').disabled = true;
     if (!preserveHash) location.hash = '';
     document.getElementById('select').selectedIndex = 0;
-    document.getElementById('link').style.visibility = 'hidden';
+    updateLink();
   }
 
   document.getElementById('randomize').onclick = async e => {
@@ -390,8 +395,7 @@ window.onload = function() {
       uid_ctrl.value = id;
       uid_ctrl.select();
       generate();
-      document.getElementById('link').style.visibility = 'visible';
-      document.getElementById('link').href=`https://github.com/${username}/`;
+      updateLink(username);
     } catch(e) {
       alert(e.message);
     }
@@ -406,7 +410,7 @@ window.onload = function() {
   uname_ctrl.addEventListener('input', function() {
     document.getElementById('fetchBtn').disabled = uname_ctrl.value.length==0;
     document.getElementById('select').selectedIndex = 0;
-    document.getElementById('link').style.visibility = 'hidden';
+    updateLink();
   })
 
   uid_ctrl.select();
