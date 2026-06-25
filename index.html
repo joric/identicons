@@ -44,10 +44,6 @@ body {
   height: 420px;
 }
 
-#link {
-  visibility: hidden;
-}
-
 form {
   padding: 15px;
 }
@@ -59,7 +55,7 @@ form {
 <div class="container">
 <div class="content">
 <h2>Identicons Generator and Finder</h2>
-
+<span><a id="link" href="https://github.com/joric/" target="_blank">Link to GitHub Profile</a></span>
 <form id="nameForm">
   <input id="username" placeholder="GitHub username" value="joric"/> <button type="submit" id="fetchBtn" disabled>Get User ID</button>
   <select id="select">
@@ -83,7 +79,6 @@ form {
   <button type="button" id="randomize" onclick="upload_image()">Upload Image</button>
 </form>
 String hash: <span id="hash"></span>
-<p><span><a id="link" href="https://github.com/joric/" target="_blank">Link to GitHub User Profile</a></span>
 </div>
 </div>
 
