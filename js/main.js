@@ -411,8 +411,11 @@ window.onload = function() {
 
   uid_ctrl.select();
 
+  let lastHash = '';
+
   function hashChange() {
-    if (location.hash.length > 1) {
+    if (location.hash.length > 1 && lastHash != location.hash) {
+      lastHash = location.hash;
       const str = location.hash.slice(1);
       if (/^\d+$/.test(str)) {
         resetUsername(true);
@@ -428,6 +431,6 @@ window.onload = function() {
 
   hashChange();
 
-  window.addEventListener('hashchange', hashChange);
+  //window.addEventListener('hashchange', hashChange); //breaks shit
 };
 
