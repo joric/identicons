@@ -44,6 +44,10 @@ body {
   height: 420px;
 }
 
+#link {
+  visibility: hidden;
+}
+
 form {
   padding: 15px;
 }
@@ -68,10 +72,9 @@ form {
     <option value="54293946">wjhbr</option>
     <option value="260864">260864</option>
   </select>
-  <span><a id="link" href="https://github.com/joric/" target="_blank">Profile</a></span>
 </form>
 
-<a href="javascript:upload_image()" title="click to upload image to find user id"><img id="image" src=""/></a>
+<img id="image" src=""/>
 
 <form id="idForm">
   <input id="userid" placeholder="String to hash (e.g. User ID)" value="852547" autofocus size=8/>
@@ -79,9 +82,8 @@ form {
   <button type="button" id="randomize">Random</button>
   <button type="button" id="randomize" onclick="upload_image()">Upload Image</button>
 </form>
-
 String hash: <span id="hash"></span>
-
+<p><span><a id="link" href="https://github.com/joric/" target="_blank">Link to GitHub User Profile</a></span>
 </div>
 </div>
 
