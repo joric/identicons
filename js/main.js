@@ -411,17 +411,23 @@ window.onload = function() {
 
   uid_ctrl.select();
 
-  if (location.hash.length > 1) {
-    const str = location.hash.slice(1);
-    if (/^\d+$/.test(str)) {
-      resetUsername(true);
-      document.getElementById('userid').value = str;
-      generate()
+  function hashChange() {
+    if (location.hash.length > 1) {
+      const str = location.hash.slice(1);
+      if (/^\d+$/.test(str)) {
+        resetUsername(true);
+        document.getElementById('userid').value = str;
+        generate()
+      } else {
+        loadUserAndGenerate(str);
+      }
     } else {
-      loadUserAndGenerate(str);
+      generate();
     }
-  } else {
-    generate();
   }
+
+  hashChange();
+
+  window.addEventListener('hashchange', hashChange);
 };
 
