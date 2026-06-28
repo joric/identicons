@@ -55,9 +55,13 @@ form {
 <div class="container">
 <div class="content">
 <h2>Identicons Generator and Finder</h2>
-<span id="link">Username Unknown</span>
+
 <form id="nameForm">
-  <input id="username" placeholder="GitHub username" value="joric"/> <button type="submit" id="fetchBtn" disabled>Get User ID</button>
+  <span id="link">Unknown Username</span>
+  <button type="submit" id="getName">Fetch Username</button>
+  <br>
+  <br>
+  <input id="username" placeholder="GitHub username" value="joric"/> <button type="submit" id="fetchBtn" disabled>Fetch User ID</button>
   <select id="select">
     <option></option>
     <option value="852547">joric</option>
@@ -74,7 +78,6 @@ form {
 
 <form id="idForm">
   <input id="userid" placeholder="String to hash (e.g. User ID)" value="852547" autofocus size=8/>
-  <button type="submit" id="getName">Get Name</button>
   <button type="button" id="randomize">Random</button>
   <button type="button" id="randomize" onclick="upload_image()">Upload Image</button>
 </form>
