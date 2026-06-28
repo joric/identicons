@@ -222,9 +222,9 @@ async function getId(username) {
   const url = `https://api.github.com/users/${username}`;
   console.log('fetching', url);
   const r = await fetch(url);
-  if (!r.ok) throw new Error(`Could not fetch user (${r.status})`);
+  if (!r.ok) throw new Error(`Could not fetch Username (${r.status})`);
   const j = await r.json();
-  console.log('fetched username', username, 'id', j.id);
+  console.log('Fetched Username', username, 'id', j.id);
   return j.id;
 }
 
