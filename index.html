@@ -55,13 +55,9 @@ form {
 <div class="container">
 <div class="content">
 
-<form id="nameForm">
-
 <h2>Identicons Generator and Finder</h2>
-  <span id="link"><a href="https://github.com/joric">https://github.com/joric</a></span>
-  <button type="submit" id="getName">Fetch Username</button>
-  <br>
-  <br>
+
+<form id="nameForm">
   <input id="username" placeholder="GitHub username" value="joric"/> <button type="submit" id="fetchBtn" disabled>Fetch User ID</button>
   <select id="select">
     <option></option>
@@ -72,16 +68,23 @@ form {
     <option value="1873201">ppuleo</option>
     <option value="54293946">wjhbr</option>
     <option value="260864">260864</option>
+    <option value="852547">852547</option>
   </select>
 </form>
 
-<img id="image" src=""/>
+<img id="image" src=""/><br>
 
 <form id="idForm">
+  <span id="link"><a href="https://github.com/joric">https://github.com/joric</a></span>
+  <button type="submit" id="getName">Fetch Username</button>
+  <br>
+  <br>
   <input id="userid" placeholder="String to hash (e.g. User ID)" value="852547" autofocus size=8/>
   <button type="button" id="randomize">Random ID</button>
   <button type="button" id="randomize" onclick="upload_image()">Upload Image</button>
 </form>
+
+
 String hash: <span id="hash"></span>
 </div>
 </div>

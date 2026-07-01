@@ -220,7 +220,7 @@ function upload_image() {
 
 async function getId(username) {
   const url = `https://api.github.com/users/${username}`;
-  console.log('fetching', url);
+  console.log('fetching id', url);
   const r = await fetch(url);
   if (!r.ok) throw new Error(`Could not fetch Username (${r.status})`);
   const j = await r.json();
@@ -230,7 +230,7 @@ async function getId(username) {
 
 async function getName(id) {
   const url = `https://api.github.com/user/${id}`;
-  console.log('fetching', url);
+  console.log('fetching username', url);
   const r = await fetch(url);
   if (!r.ok) throw new Error(`Could not fetch user (${r.status})`);
   const j = await r.json();
@@ -305,6 +305,7 @@ async function loadUserName() {
   let uname_ctrl = document.getElementById('username');
   let uid_ctrl = document.getElementById('userid');
   const id = uid_ctrl.value;
+  console.log('trying to fetch', id);
   try {
     const username = await getName(id);
     uname_ctrl.value = username;
