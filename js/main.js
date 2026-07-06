@@ -9,9 +9,23 @@ function get_color(id) {
 }
 
 const isEqualColor = (a, b) => a.r === b.r && a.g === b.g && a.b === b.b;
+const colorDelta = (a, b) => Math.abs(a.r - b.r) + Math.abs(a.g - b.g) + Math.abs(a.b - b.b);
 
 function filter_by_color(results, targetColor) {
-  return results.filter(id => isEqualColor(get_color(id),targetColor));
+  //let out = results.filter(id => isEqualColor(get_color(id),targetColor));
+
+  let out = [];
+
+  for (id of results) {
+    let c = get_color(id);
+    //console.log(id, c, targetColor, isEqualColor(c,targetColor));
+    if (colorDelta(c,targetColor)<=3) {
+      out.push(id);
+    }
+  }
+
+  if (out.length>0) return out;
+  return results; // if no matches just return the whole bunch
 }
 
 function find_targets(targetHex, maskHex, targetColor) {
