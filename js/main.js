@@ -1,4 +1,20 @@
-function find_targets(targetHex, maskHex) {
+function get_color(id) {
+  const hash = md5(String(id));
+  const m = hash.split('').map(c => parseInt(c,16));
+  const H = (m[25]<<8 | m[26]<<4 | m[27]) / (16*256);
+  const L = (960 - (m[30]<<4 | m[31])) / (5*256);
+  const S = (832 - (m[28]<<4 | m[29])) / (5*256);
+  const rgb = hsl2rgb(H, S, L).map(x => Math.round(x*255));
+  return {r:rgb[0], g:rgb[1], b:rgb[2]};
+}
+
+const isEqualColor = (a, b) => a.r === b.r && a.g === b.g && a.b === b.b;
+
+function filter_by_color(results, targetColor) {
+  return results.filter(id => isEqualColor(get_color(id),targetColor));
+}
+
+function find_targets(targetHex, maskHex, targetColor) {
   const maxId = 300_000_000; //300 million users now
 
   const numThreads = (navigator.hardwareConcurrency || 4) * 2; // 2x oversubscribing
@@ -48,6 +64,8 @@ function find_targets(targetHex, maskHex) {
               console.log(stats);
 
               console.log('Total results', count);
+
+              results = filter_by_color(results, targetColor);
 
               for (const id of results.sort((a, b) => a - b).slice(0, 500)) {
                   const text=String(id);
@@ -191,7 +209,7 @@ function processImage(img) {
 
   mask='1111111111111110000000000fc00000'; // this works better (for jasonlong and stewardlord)
 
-  find_targets(target, mask);
+  find_targets(target, mask, targetColor);
 }
 
 function upload_image() {
