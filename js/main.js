@@ -18,8 +18,9 @@ function filter_by_color(results, targetColor) {
 
   for (id of results) {
     let c = get_color(id);
-    //console.log(id, c, targetColor, isEqualColor(c,targetColor));
-    if (colorDelta(c,targetColor)<=3) {
+    let delta = colorDelta(c,targetColor);
+    if (delta<=3) {
+      console.log('Color match!', id, c, targetColor, 'delta', delta);
       out.push(id);
     }
   }
