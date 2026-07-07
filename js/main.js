@@ -95,6 +95,8 @@ function find_targets(targetHex, maskHex, targetColor) {
                 select.selectedIndex = 1;
                 select.dispatchEvent(new Event('change', { bubbles: true }));
               }
+
+              document.getElementById('upload').disabled = false;
           }
       };
 
@@ -227,6 +229,8 @@ function processImage(img) {
 }
 
 function upload_image() {
+  document.getElementById('upload').disabled = true;
+
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
