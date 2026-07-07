@@ -82,7 +82,7 @@ function find_targets(targetHex, maskHex, targetColor) {
 
               results = filter_by_color(results, targetColor);
 
-              console.log(`Filtered by color, ${results.length} results.`);
+              console.log(`Filtered by color, ${results.length} result(s).`);
 
               for (const id of results.sort((a, b) => a - b).slice(0, 500)) {
                   const text=String(id);
