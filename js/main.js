@@ -81,6 +81,8 @@ function find_targets(targetHex, maskHex, targetColor) {
 
               results = filter_by_color(results, targetColor);
 
+              console.log(`Filtered by color, ${results.length} results.`);
+
               for (const id of results.sort((a, b) => a - b).slice(0, 500)) {
                   const text=String(id);
                   const option = document.createElement('option');
@@ -229,8 +231,6 @@ function processImage(img) {
 }
 
 function upload_image() {
-  document.getElementById('upload').disabled = true;
-
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
@@ -244,6 +244,7 @@ function upload_image() {
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
+        document.getElementById('upload').disabled = true;
         processImage(img);
       };
       img.src = e.target.result;
