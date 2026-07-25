@@ -40,6 +40,7 @@ const BitmapEditor = (function() {
             this.bg = toHex(options.backgroundColor);
             this.fg = toHex(options.foregroundColor);
             this.bgRgb = hexToRgb(this.bg);
+            this.fgRgb = hexToRgb(this.fg);
             this.mh = options.mirrorHorizontal;
             this.bw = options.borderWidth;
 
@@ -220,15 +221,15 @@ const BitmapEditor = (function() {
             return null;
         }
 
-        isCanvasBackgroundPixel(row, col) {
+        isCanvasForegroundPixel(row, col) {
             const x = this.bw + col * this.ps + Math.floor(this.ps / 2);
             const y = this.bw + row * this.ps + Math.floor(this.ps / 2);
             const [r, g, b] = this.ctx.getImageData(x, y, 1, 1).data;
 
             return (
-                r === this.bgRgb.r &&
-                g === this.bgRgb.g &&
-                b === this.bgRgb.b
+                r === this.fgRgb.r &&
+                g === this.fgRgb.g &&
+                b === this.fgRgb.b
             );
         }
 
@@ -252,7 +253,7 @@ const BitmapEditor = (function() {
             this.invertedThisStroke.add(key);
 
             // The canvas, rather than an in-memory stroke buffer, decides the toggle.
-            const color = this.isCanvasBackgroundPixel(row, col) ? this.fg : this.bg;
+            const color = this.isCanvasForegroundPixel(row, col) ? this.bg : this.fg;
 
             this.ctx.fillStyle = color;
             this.ctx.fillRect(
@@ -355,6 +356,7 @@ const BitmapEditor = (function() {
 
         setForegroundColor(color) {
             this.fg = toHex(color);
+            this.fgRgb = hexToRgb(this.fg);
         }
     }
 
