@@ -102,6 +102,7 @@ function find_targets(targetHex, maskHex, targetColor) {
               }
 
               document.getElementById('upload').disabled = false;
+              document.getElementById('search').disabled = false;
           }
       };
 
@@ -110,26 +111,24 @@ function find_targets(targetHex, maskHex, targetColor) {
 
 }
 
-function processImage(img) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 350;
-  canvas.height = 350;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  
-  // Draw image at 350x350 (no border)
-  ctx.drawImage(img, 0, 0, 350, 350);
-  
+function search_image() {
+  document.getElementById('search').disabled = true;
+
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
   // Read 5x5 grid, each cell 70px
   const gridSize = 5;
   const cellSize = 70;
   const colors = [];
+  const borderWidth = 35;
   
   for (let row = 0; row < gridSize; row++) {
     const rowColors = [];
     for (let col = 0; col < gridSize; col++) {
       const px = col * cellSize + cellSize/2;
       const py = row * cellSize + cellSize/2;
-      const pixel = ctx.getImageData(px, py, 1, 1).data;
+      const pixel = ctx.getImageData(borderWidth+px, borderWidth+py, 1, 1).data;
       rowColors.push({
         r: pixel[0],
         g: pixel[1],
@@ -239,6 +238,8 @@ function upload_image() {
   input.accept = 'image/*';
   input.style.display = 'none';
 
+  document.getElementById('upload').disabled = true;
+
   input.onchange = function() {
     const file = this.files[0];
     if (!file) return;
@@ -247,8 +248,11 @@ function upload_image() {
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
-        document.getElementById('upload').disabled = true;
-        processImage(img);
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        document.getElementById('upload').disabled = false;
       };
       img.src = e.target.result;
     };
@@ -325,9 +329,17 @@ function generate() {
 
   var data = new Identicon(hash, options).toString();
 
-  var img = document.getElementById('image')
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
 
+  var img = new Image();
   img.src = 'data:image/png;base64,' + data;
+
+  img.onload = function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+  };
 
   //document.getElementById('lookup').style.visibility = 'visible';
   //document.getElementById('lookup').href = `https://api.github.com/user/${id}`;
@@ -479,5 +491,20 @@ window.onload = function() {
   hashChange();
 
   //window.addEventListener('hashchange', hashChange); //breaks shit
+
+  const editor = BitmapEditor.create(document.getElementById('canvas'), {
+      width: 5,
+      height: 5,
+      pixelSize: 70,
+      backgroundColor: '#f0f0f0',
+      foregroundColor: '#9FA9DD',
+      mirrorHorizontal: true,
+      borderWidth: 35,
+  });
+
+  document.getElementById('fgColor').addEventListener('input', (e) => {
+      editor.setForegroundColor(e.target.value);
+  });
+
 };
 

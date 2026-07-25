@@ -17,7 +17,8 @@
 <script src="js/md5.js"></script>
 <script src="js/identicon.js"></script>
 <script src="js/hsl2rgb.js"></script>
-<script src="js/main.js"></script>
+<script src="js/bitmap-editor.js"></script>
+<script src="js/main-dev.js"></script>
 <style>
 
 body {
@@ -72,16 +73,18 @@ form {
   </select>
 </form>
 
-<img id="image" src=""/><br>
+<canvas id="canvas" width=420 height=420></canvas>
 
 <form id="idForm">
   <span id="link"><a href="https://github.com/joric">https://github.com/joric</a></span>
   <button type="submit" id="getName">Fetch Username</button>
+  <input type="color" id="fgColor" value="#9FA9DD">
   <br>
   <br>
   <input id="userid" placeholder="String to hash (e.g. User ID)" value="852547" autofocus size=8/>
   <button type="button" id="randomize">Random ID</button>
   <button type="button" id="upload" onclick="upload_image()">Upload Image</button>
+  <button type="button" id="search" onclick="search_image()">Search</button>
 </form>
 
 
