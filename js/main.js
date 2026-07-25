@@ -26,7 +26,9 @@ function filter_by_color(results, targetColor) {
   }
 
   if (out.length>0) return out;
-  return results; // if no matches just return the whole bunch
+
+  console.log("no exact matches, returning the whole bunch");
+  return results;
 }
 
 function find_targets(targetHex, maskHex, targetColor) {
