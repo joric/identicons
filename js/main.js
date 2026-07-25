@@ -270,6 +270,10 @@ function upload_image() {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         update_color();
+
+        document.getElementById('userid').value = '';
+        document.getElementById('hash').value = '';
+
       };
       img.src = e.target.result;
     };
