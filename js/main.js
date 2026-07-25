@@ -11,6 +11,8 @@ function get_color(id) {
 const isEqualColor = (a, b) => a.r === b.r && a.g === b.g && a.b === b.b;
 const colorDelta = (a, b) => Math.abs(a.r - b.r) + Math.abs(a.g - b.g) + Math.abs(a.b - b.b);
 
+let editor = null;
+
 function filter_by_color(results, targetColor) {
   //let out = results.filter(id => isEqualColor(get_color(id),targetColor));
 
@@ -101,7 +103,6 @@ function find_targets(targetHex, maskHex, targetColor) {
                 select.dispatchEvent(new Event('change', { bubbles: true }));
               }
 
-              document.getElementById('upload').disabled = false;
               document.getElementById('search').disabled = false;
           }
       };
@@ -111,11 +112,9 @@ function find_targets(targetHex, maskHex, targetColor) {
 
 }
 
-function search_image() {
-  document.getElementById('search').disabled = true;
-
-  var canvas = document.getElementById('canvas');
-  var ctx = canvas.getContext('2d', { willReadFrequently: true });
+function update_color() {
+  let canvas = document.getElementById('canvas');
+  let ctx = canvas.getContext('2d', { willReadFrequently: true });
     
   // Read 5x5 grid, each cell 70px
   const gridSize = 5;
@@ -137,7 +136,8 @@ function search_image() {
     }
     colors.push(rowColors);
   }
-  console.log(colors);
+
+  //console.log(colors);
 
   let targetColor = 255;
 
@@ -149,6 +149,24 @@ function search_image() {
       return (brightness == 240 || brightness == 255) ? 0 : 1;
     }).join('')
   );
+
+  function rgbToHex(r, g, b) {
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  let color = rgbToHex(targetColor.r, targetColor.g, targetColor.b);
+
+  document.getElementById('fgColor').value = color;
+  editor.setForegroundColor(color);
+
+  return [grid, targetColor];
+}
+
+function search_image() {
+
+  document.getElementById('search').disabled = true;
+
+  let [grid, targetColor] = update_color();
 
   console.log(grid.join('\n'));
 
@@ -238,7 +256,6 @@ function upload_image() {
   input.accept = 'image/*';
   input.style.display = 'none';
 
-  document.getElementById('upload').disabled = true;
 
   input.onchange = function() {
     const file = this.files[0];
@@ -252,7 +269,7 @@ function upload_image() {
         var ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        document.getElementById('upload').disabled = false;
+        update_color();
       };
       img.src = e.target.result;
     };
@@ -339,6 +356,7 @@ function generate() {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
+      update_color();
   };
 
   //document.getElementById('lookup').style.visibility = 'visible';
@@ -492,7 +510,7 @@ window.onload = function() {
 
   //window.addEventListener('hashchange', hashChange); //breaks shit
 
-  const editor = BitmapEditor.create(document.getElementById('canvas'), {
+  editor = BitmapEditor.create(document.getElementById('canvas'), {
       width: 5,
       height: 5,
       pixelSize: 70,

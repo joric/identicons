@@ -22,6 +22,16 @@ const BitmapEditor = (function() {
         return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 
+    function hexToRgb(hex) {
+        const value = parseInt(hex.slice(1), 16);
+
+        return {
+            r: value >> 16,
+            g: (value >> 8) & 255,
+            b: value & 255,
+        };
+    }
+
     class BitmapEditorInstance {
         constructor(canvas, options) {
             this.w = options.width;
@@ -29,10 +39,9 @@ const BitmapEditor = (function() {
             this.ps = options.pixelSize;
             this.bg = toHex(options.backgroundColor);
             this.fg = toHex(options.foregroundColor);
+            this.bgRgb = hexToRgb(this.bg);
             this.mh = options.mirrorHorizontal;
             this.bw = options.borderWidth;
-
-            console.log(this);
 
             this.canvas = canvas;
             this.canvas.width = this.w * this.ps + this.bw * 2;
@@ -54,7 +63,6 @@ const BitmapEditor = (function() {
 
             this.isDrawing = false;
             this.activePointerId = null;
-            this.tempPixels = null;
             this.invertedThisStroke = new Set();
             this.lastX = null;
             this.lastY = null;
@@ -65,32 +73,29 @@ const BitmapEditor = (function() {
             this.onPointerDown = (e) => {
                 if (e.button !== 0 || this.isDrawing) return;
 
+                const coord = this.getPixelIndex(e.clientX, e.clientY);
+                if (!coord) return;
+
                 e.preventDefault();
 
                 this.isDrawing = true;
                 this.activePointerId = e.pointerId;
-                this.tempPixels = this.pixels.map(row => [...row]);
                 this.invertedThisStroke.clear();
                 this.strokeChanged = false;
-
-                this.canvas.setPointerCapture(e.pointerId);
-
-                const coord = this.getPixelIndex(e.clientX, e.clientY);
-                if (!coord) return;
-
                 this.lastX = coord.col;
                 this.lastY = coord.row;
-                this.invertPixelTemp(coord.row, coord.col);
+
+                this.canvas.setPointerCapture(e.pointerId);
+                this.invertPixel(coord.row, coord.col);
             };
 
             this.onPointerMove = (e) => {
                 if (!this.isDrawing || e.pointerId !== this.activePointerId) return;
 
-                e.preventDefault();
-
                 const coord = this.getPixelIndex(e.clientX, e.clientY);
                 if (!coord) return;
 
+                e.preventDefault();
                 this.pendingCoord = coord;
 
                 if (this.drawFrame === null) {
@@ -138,14 +143,14 @@ const BitmapEditor = (function() {
         }
 
         flushPendingDraw() {
-            if (!this.isDrawing || !this.tempPixels || !this.pendingCoord) return;
+            if (!this.isDrawing || !this.pendingCoord) return;
 
             const coord = this.pendingCoord;
             this.pendingCoord = null;
 
             if (coord.col === this.lastX && coord.row === this.lastY) return;
 
-            this.bresenhamTemp(this.lastY, this.lastX, coord.row, coord.col);
+            this.bresenham(this.lastY, this.lastX, coord.row, coord.col);
             this.lastX = coord.col;
             this.lastY = coord.row;
         }
@@ -160,14 +165,12 @@ const BitmapEditor = (function() {
 
             this.flushPendingDraw();
 
-            if (this.tempPixels && this.strokeChanged) {
-                this.pixels = this.tempPixels;
+            if (this.strokeChanged) {
                 this.saveToHistory();
             }
 
             this.isDrawing = false;
             this.activePointerId = null;
-            this.tempPixels = null;
             this.pendingCoord = null;
             this.invertedThisStroke.clear();
             this.lastX = null;
@@ -175,7 +178,7 @@ const BitmapEditor = (function() {
             this.strokeChanged = false;
         }
 
-        bresenhamTemp(y0, x0, y1, x1) {
+        bresenham(y0, x0, y1, x1) {
             let dx = Math.abs(x1 - x0);
             let dy = Math.abs(y1 - y0);
             const sx = x0 < x1 ? 1 : -1;
@@ -183,7 +186,7 @@ const BitmapEditor = (function() {
             let err = dx - dy;
 
             while (true) {
-                this.invertPixelTemp(y0, x0);
+                this.invertPixel(y0, x0);
 
                 if (x0 === x1 && y0 === y1) break;
 
@@ -217,41 +220,51 @@ const BitmapEditor = (function() {
             return null;
         }
 
-        invertPixelTemp(row, col) {
-            this.invertSinglePixelTemp(row, col);
+        isCanvasBackgroundPixel(row, col) {
+            const x = this.bw + col * this.ps + Math.floor(this.ps / 2);
+            const y = this.bw + row * this.ps + Math.floor(this.ps / 2);
+            const [r, g, b] = this.ctx.getImageData(x, y, 1, 1).data;
+
+            return (
+                r === this.bgRgb.r &&
+                g === this.bgRgb.g &&
+                b === this.bgRgb.b
+            );
+        }
+
+        invertPixel(row, col) {
+            this.invertSinglePixel(row, col);
 
             if (this.mh) {
                 const mirroredCol = this.w - 1 - col;
 
                 if (mirroredCol !== col) {
-                    this.invertSinglePixelTemp(row, mirroredCol);
+                    this.invertSinglePixel(row, mirroredCol);
                 }
             }
         }
 
-        invertSinglePixelTemp(row, col) {
-            if (!this.tempPixels) return;
-
+        invertSinglePixel(row, col) {
             const key = `${row},${col}`;
 
             if (this.invertedThisStroke.has(key)) return;
 
             this.invertedThisStroke.add(key);
-            this.tempPixels[row][col] =
-                this.tempPixels[row][col] === this.bg ? this.fg : this.bg;
 
-            this.strokeChanged = true;
-            this.drawPixelTemp(row, col);
-        }
+            // The canvas, rather than an in-memory stroke buffer, decides the toggle.
+            const color = this.isCanvasBackgroundPixel(row, col) ? this.fg : this.bg;
 
-        drawPixelTemp(row, col) {
-            this.ctx.fillStyle = this.tempPixels[row][col];
+            this.ctx.fillStyle = color;
             this.ctx.fillRect(
                 this.bw + col * this.ps,
                 this.bw + row * this.ps,
                 this.ps,
                 this.ps
             );
+
+            // This is retained only for undo/redo history snapshots.
+            this.pixels[row][col] = color;
+            this.strokeChanged = true;
         }
 
         render() {
@@ -299,14 +312,26 @@ const BitmapEditor = (function() {
         }
 
         clear() {
-            const clearedPixels = Array.from(
+            let changed = false;
+
+            for (let row = 0; row < this.h; row++) {
+                for (let col = 0; col < this.w; col++) {
+                    if (this.pixels[row][col] !== this.bg) {
+                        changed = true;
+                        break;
+                    }
+                }
+
+                if (changed) break;
+            }
+
+            if (!changed) return;
+
+            this.pixels = Array.from(
                 { length: this.h },
                 () => Array(this.w).fill(this.bg)
             );
 
-            if (JSON.stringify(clearedPixels) === JSON.stringify(this.pixels)) return;
-
-            this.pixels = clearedPixels;
             this.render();
             this.saveToHistory();
         }
@@ -331,7 +356,6 @@ const BitmapEditor = (function() {
         setForegroundColor(color) {
             this.fg = toHex(color);
         }
-
     }
 
     return {
