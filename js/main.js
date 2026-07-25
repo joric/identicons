@@ -32,7 +32,7 @@ function filter_by_color(results, targetColor) {
 }
 
 function find_targets(targetHex, maskHex, targetColor) {
-  const maxId = 300_000_000; //300 million users now
+  const maxId = 350_000_000; //350 million users now
 
   const numThreads = (navigator.hardwareConcurrency || 4) * 2; // 2x oversubscribing
   const chunkSize = Math.ceil(maxId / numThreads);
