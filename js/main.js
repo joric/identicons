@@ -96,7 +96,7 @@ function find_targets(targetHex, maskHex, targetColor) {
                   select.appendChild(option);
               }
 
-              select.options[0].text = `${select.options.length-1} results`;
+              select.options[0].text = `${select.options.length-1} result(s)`;
               select.options[0].value = '';
               if (select.options.length>1) {
                 select.selectedIndex = 1;
