@@ -27,7 +27,7 @@ function filter_by_color(results, targetColor) {
 
   if (out.length>0) return out;
 
-  console.log("no exact matches, returning the whole bunch");
+  console.log("no color matches, returning the whole bunch");
   return results;
 }
 
