@@ -251,9 +251,10 @@ function search_image() {
 }
 
 function resetFields() {
-    document.getElementById('username').value = '';
-    document.getElementById('userid').value = '';
-    document.getElementById('hash').value = '';
+  document.getElementById('username').value = '';
+  document.getElementById('userid').value = '';
+  document.getElementById('hash').value = '';
+  updateLink('');
 }
 
 function upload_image() {
