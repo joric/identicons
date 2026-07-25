@@ -250,6 +250,12 @@ function search_image() {
   find_targets(target, mask, targetColor);
 }
 
+function resetFields() {
+    document.getElementById('username').value = '';
+    document.getElementById('userid').value = '';
+    document.getElementById('hash').value = '';
+}
+
 function upload_image() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -270,10 +276,7 @@ function upload_image() {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         update_color();
-
-        document.getElementById('userid').value = '';
-        document.getElementById('hash').value = '';
-
+        resetFields();
       };
       img.src = e.target.result;
     };
@@ -527,6 +530,8 @@ window.onload = function() {
   document.getElementById('fgColor').addEventListener('input', (e) => {
       editor.setForegroundColor(e.target.value);
   });
+
+  document.getElementById('canvas').addEventListener('click', resetFields);
 
 };
 
