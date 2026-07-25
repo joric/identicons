@@ -326,7 +326,7 @@ function generate() {
 
   const hash = md5(String(id));
 
-  document.getElementById('hash').textContent = hash;
+  document.getElementById('hash').value = hash;
 
   //console.log(hash, hsl2rgb);
 
