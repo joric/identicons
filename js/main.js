@@ -34,7 +34,7 @@ function filter_by_color(results, targetColor) {
 }
 
 function find_targets(targetHex, maskHex, targetColor) {
-  const maxId = 350_000_000; //350 million users now
+  const maxId = parseInt(document.getElementById('maxId').value); //350 million users now
 
   const numThreads = (navigator.hardwareConcurrency || 4) * 2; // 2x oversubscribing
   const chunkSize = Math.ceil(maxId / numThreads);
@@ -456,7 +456,8 @@ window.onload = function() {
   document.getElementById('randomize').onclick = async e => {
     e.preventDefault();
     resetUsername();
-    uid_ctrl.value = Math.floor(Math.random() * 150000000); // about 150 million users as of 2025
+    let maxId = parseInt(document.getElementById('maxId').value);
+    uid_ctrl.value = Math.floor(Math.random() * maxId);
     uid_ctrl.select();
     generateOnChange();
   }
