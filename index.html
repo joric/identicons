@@ -28,11 +28,19 @@
 <script src="js/main.js"></script>
 
 <style>
-.input-group button:last-child {
-  border: 1px solid #ced4da;
-  border-left: none;
-  background: white;
-  color: #6c757d;
+.input-group .btn {
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+}
+.input-group .btn:hover {
+  background: var(--bs-secondary-bg);
+}
+.input-group .form-control:not(:last-child) {
+  border-right: 0;
+}
+.input-group .btn:last-child {
+  border-left: 0;
 }
 </style>
 
@@ -101,7 +109,7 @@
   <div class="col-sm-9">
     <div class="input-group">
       <input type="number" class="form-control flex-grow-1" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000" onchange="enforceRange(this)">
-      <button class="btn" title="Reset to default" id="getMaxId">⟳</button>
+      <button class="btn" title="Reset to default" id="getMaxId">&#x21BB;</button>
     </div>
   </div>
 </div>
@@ -124,7 +132,7 @@ function enforceRange(input) {
     <form id="nameForm">
     <div class="input-group">
       <input type="text" class="form-control" id="username" placeholder="Username" value="joric">
-      <button class="btn" title="Fetch ID by Username" id="fetchBtn">⟳</button>
+      <button class="btn" title="Fetch ID by Username" id="fetchBtn">&#x21BB;</button>
     </div>
     </form>
   </div>
@@ -136,7 +144,7 @@ function enforceRange(input) {
     <form id="idForm">
     <div class="input-group">
       <input type="number" class="form-control flex-grow-1" id="userid" placeholder="User ID" inputmode="numeric" pattern="[0-9]*" value="852547">
-      <button class="btn" title="Fetch Username by ID" id="getName">⟳</button>
+      <button class="btn" title="Fetch Username by ID" id="getName">&#x21BB;</button>
     </div>
     </form>
   </div>
