@@ -273,7 +273,7 @@ function upload_image() {
       const img = new Image();
       img.onload = function() {
         var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
+        var ctx = canvas.getContext('2d', { willReadFrequently: true });
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         update_color();
@@ -355,7 +355,7 @@ function generate() {
   var data = new Identicon(hash, options).toString();
 
   var canvas = document.getElementById('canvas');
-  var ctx = canvas.getContext('2d');
+  var ctx = canvas.getContext('2d', { willReadFrequently: true });
 
   var img = new Image();
   img.src = 'data:image/png;base64,' + data;
