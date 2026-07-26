@@ -535,5 +535,9 @@ window.onload = function() {
 
   document.getElementById('canvas').addEventListener('click', resetFields);
 
+  document.getElementById('getMaxId').addEventListener('click', e=>{
+    document.getElementById('maxId').value = 350000000;
+  });
+
 };
 

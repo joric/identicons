@@ -27,6 +27,15 @@
 
 <script src="js/main.js"></script>
 
+<style>
+.input-group button:last-child {
+  border: 1px solid #ced4da;
+  border-left: none;
+  background: white;
+  color: #6c757d;
+}
+</style>
+
 </head>
 <body>
 
@@ -90,7 +99,10 @@
 <div class="row mb-3">
   <label for="md5" class="col-sm-3 col-form-label fw-bold">Largest ID</label>
   <div class="col-sm-9">
-    <input type="number" class="form-control flex-grow-1" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000">
+    <div class="input-group">
+      <input type="number" class="form-control flex-grow-1" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000">
+      <button class="btn" title="Reset to default" id="getMaxId">⟳</button>
+    </div>
   </div>
 </div>
 
@@ -100,7 +112,7 @@
     <form id="nameForm">
     <div class="input-group">
       <input type="text" class="form-control" id="username" placeholder="Username" value="joric">
-      <button class="btn" title="Fetch ID by Username" id="fetchBtn" style="border: 1px solid #ced4da; border-left: none; background: white; color: #6c757d;">⟳</button>
+      <button class="btn" title="Fetch ID by Username" id="fetchBtn">⟳</button>
     </div>
     </form>
   </div>
@@ -112,7 +124,7 @@
     <form id="idForm">
     <div class="input-group">
       <input type="number" class="form-control flex-grow-1" id="userid" placeholder="User ID" inputmode="numeric" pattern="[0-9]*" value="852547">
-      <button class="btn" title="Fetch Username by ID" id="getName" style="border: 1px solid #ced4da; border-left: none; background: white; color: #6c757d;">⟳</button>
+      <button class="btn" title="Fetch Username by ID" id="getName">⟳</button>
     </div>
     </form>
   </div>
