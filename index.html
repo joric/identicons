@@ -100,11 +100,23 @@
   <label for="md5" class="col-sm-3 col-form-label fw-bold">Largest User ID</label>
   <div class="col-sm-9">
     <div class="input-group">
-      <input type="number" class="form-control flex-grow-1" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000">
+      <input type="number" class="form-control flex-grow-1" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000" onchange="enforceRange(this)">
       <button class="btn" title="Reset to default" id="getMaxId">⟳</button>
     </div>
   </div>
 </div>
+
+<script>
+function enforceRange(input) {
+  const min = parseFloat(input.min);
+  const max = parseFloat(input.max);
+  let value = parseFloat(input.value);
+  if (!isNaN(value)) {
+    if (value < min) input.value = min;
+    if (value > max) input.value = max;
+  }
+}
+</script>
 
 <div class="row mb-3">
   <label for="login" class="col-sm-3 col-form-label fw-bold">Username</label>
