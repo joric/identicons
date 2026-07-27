@@ -112,6 +112,26 @@ function find_targets(targetHex, maskHex, targetColor) {
 
 }
 
+function draw_grid(grid, color) {
+  let canvas = document.getElementById('canvas');
+  let ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  ctx.fillStyle = 'rgb(240, 240, 240)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  let d = 35;
+  let r = 70;
+
+  ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+
+  for (let x = 0; x<5; x++) {
+    for (let y=0; y<5; y++) {
+      if (grid[y][x]==1) ctx.fillRect(d+x*r, d+y*r, r,r);
+    }
+  }
+}
+
+
 function update_color() {
   let canvas = document.getElementById('canvas');
   let ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -158,6 +178,8 @@ function update_color() {
 
   document.getElementById('fgColor').value = color;
   editor.setForegroundColor(color);
+
+  draw_grid(grid, targetColor);
 
   return [grid, targetColor];
 }
@@ -327,15 +349,7 @@ function generateOnChange() {
   generate();
 }
 
-function generate() {
-  const id = document.getElementById('userid').value;
-
-  //let id = 852547;
-
-  const hash = md5(String(id));
-
-  document.getElementById('hash').value = hash;
-
+function generateInternal(hash) {
   //console.log(hash, hsl2rgb);
 
   const m = hash.split('').map(c => parseInt(c,16));
@@ -353,19 +367,29 @@ function generate() {
   };
 
   var data = new Identicon(hash, options).toString();
-
-  var canvas = document.getElementById('canvas');
-  var ctx = canvas.getContext('2d', { willReadFrequently: true });
-
   var img = new Image();
   img.src = 'data:image/png;base64,' + data;
 
   img.onload = function() {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      update_color();
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d', { willReadFrequently: true });
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    update_color();
   };
+}
+
+function generate() {
+  const id = document.getElementById('userid').value;
+
+  //let id = 852547;
+
+  const hash = md5(String(id));
+
+  document.getElementById('hash').value = hash;
+
+  generateInternal(hash);
 
   //document.getElementById('lookup').style.visibility = 'visible';
   //document.getElementById('lookup').href = `https://api.github.com/user/${id}`;
