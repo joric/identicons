@@ -549,7 +549,7 @@ window.onload = function() {
       pixelSize: 70,
       backgroundColor: '#f0f0f0',
       foregroundColor: '#9FA9DD',
-      mirrorHorizontal: true,
+      mirrorHorizontal: false,
       borderWidth: 35,
   });
 
