@@ -406,6 +406,7 @@ async function updateLink(username) {
 }
 
 async function loadUserName() {
+  document.getElementById('fetch').disabled = true;
   let uname_ctrl = document.getElementById('username');
   let uid_ctrl = document.getElementById('userid');
   const id = uid_ctrl.value;
@@ -420,6 +421,8 @@ async function loadUserName() {
     location.hash = username;
   } catch (e) {
     alert(e.message);
+  } finally {
+    document.getElementById('fetch').disabled = false;
   }
 }
 
@@ -563,5 +566,6 @@ window.onload = function() {
     document.getElementById('maxId').value = 350000000;
   });
 
-};
-
+  document.getElementById('search').addEventListener('click', search_image);
+  document.getElementById('fetch').addEventListener('click', loadUserName);
+}
