@@ -14,7 +14,7 @@ const BitmapEditor = (function() {
             }
         }
 
-        const ctx = document.createElement('canvas').getContext('2d');
+        const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
         ctx.fillStyle = color;
         ctx.fillRect(0, 0, 1, 1);
 
@@ -47,7 +47,7 @@ const BitmapEditor = (function() {
             this.canvas = canvas;
             this.canvas.width = this.w * this.ps + this.bw * 2;
             this.canvas.height = this.h * this.ps + this.bw * 2;
-            this.ctx = this.canvas.getContext('2d');
+            this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
             this.canvas.style.cursor = 'crosshair';
             this.canvas.style.display = 'block';
