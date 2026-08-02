@@ -595,7 +595,8 @@ window.onload = function() {
 
   document.getElementById('canvas').addEventListener('click', resetFields);
 
-  //document.getElementById('maxId').value = estimate.count;
+  let estId = Math.ceil(estimate.count + estimate.growthPerYear * (Date.now() - estimate.date) / (365.25 * 24 * 60 * 60 * 1000));
+  document.getElementById('maxId').value = Math.ceil(estId / estimate.growthPerYear) * estimate.growthPerYear;
 
   document.getElementById('getMaxId').addEventListener('click', e=>{
     findLargestUserId().then(user => {
