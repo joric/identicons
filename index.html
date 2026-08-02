@@ -121,43 +121,44 @@
 </div>
 
 <div class="row mb-3">
-  <label for="hash" class="col-sm-3 col-form-label fw-bold">Target / Mask</label>
-  <div class="col-sm-9">
-    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center gap-3">
-      <input type="text" class="form-control font-monospace" id="target" placeholder="Target" inputmode="numeric" pattern="[0-9a-fA-F]*">
-      <input type="text" class="form-control font-monospace" id="mask" placeholder="Mask" inputmode="numeric" pattern="[0-9a-fA-F]*">
-    </div>
-  </div>
-</div>
-
-
-<div class="row mb-3">
   <label class="col-sm-3 col-form-label fw-bold">Image</label>
+
   <div class="col-sm-9">
 
     <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center gap-3">
 
-    <div class="btn-group flex-grow-1" role="group">
-      <input class="form-control form-control-color btn btn-outline-secondary col-1" type="color" id="color" value="#9FA9DD">
-      <button class="btn btn-outline-secondary" type="button" data-fn="upload_image">Upload Image</button>
-      <button class="btn btn-outline-secondary" type="button" data-fn="search_image">Search</button>
-    </div>
-    <select id="select" class="form-select flex-grow-1" style="min-width:120px;width:auto;flex-shrink:0;">
-      <option></option>
-      <option value="852547">joric</option>
-      <option value="218503">stewartlord</option>
-      <option value="6104">jasonlong</option>
-      <option value="197742">infusion</option>
-      <option value="1873201">ppuleo</option>
-      <option value="54293946">wjhbr</option>
-      <option value="260864">260864</option>
-      <option value="852547">852547</option>
-    </select>
+      <div class="btn-group flex-grow-1" role="group">
+        <input class="form-control form-control-color btn btn-outline-secondary col-1" type="color" id="color" value="#9FA9DD">
+        <button class="btn btn-outline-secondary" type="button" data-fn="upload_image">Upload Image</button>
+        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#targetMaskCollapse" onclick="this.classList.toggle('btn-secondary');this.classList.toggle('btn-outline-secondary')">Target / Mask</button>
+        <button class="btn btn-outline-secondary" type="button" data-fn="search_image">Search</button>
+      </div>
 
+      <select id="select" class="form-select flex-grow-1" style="min-width:120px;width:auto;flex-shrink:0;">
+        <option></option>
+        <option value="852547">joric</option>
+        <option value="218503">stewartlord</option>
+        <option value="6104">jasonlong</option>
+        <option value="197742">infusion</option>
+        <option value="1873201">ppuleo</option>
+        <option value="54293946">wjhbr</option>
+        <option value="260864">260864</option>
+        <option value="852547">852547</option>
+      </select>
+
+    </div>
+
+    <div class="collapse" id="targetMaskCollapse">
+      <div class="d-flex flex-column flex-xl-row gap-3 pt-3">
+        <input type="text" class="form-control font-monospace" id="target" placeholder="Target">
+        <input type="text" class="form-control font-monospace" id="mask" placeholder="Mask">
+      </div>
     </div>
 
   </div>
+
 </div>
+
 
 <div class="row mb-3">
   <label class="col-sm-3 col-form-label fw-bold"></label>
