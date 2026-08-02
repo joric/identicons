@@ -595,7 +595,7 @@ window.onload = function() {
 
   document.getElementById('canvas').addEventListener('click', resetFields);
 
-  document.getElementById('maxId').value = estimate.count;
+  //document.getElementById('maxId').value = estimate.count;
 
   document.getElementById('getMaxId').addEventListener('click', e=>{
     findLargestUserId().then(user => {
