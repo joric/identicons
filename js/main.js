@@ -5,29 +5,30 @@ const estimate = {
 };
 
 async function findLargestUserId() {
-  const next = async since => {
-    let url = `https://api.github.com/users?since=${since}&per_page=1`;
+  const get = async since => {
+    const url = `https://api.github.com/users?since=${since}&per_page=100`;
     console.log('fetching', url);
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
-    return (await res.json())[0] || null;
+    if (!res.ok) throw Error(`GitHub API error: ${res.status}`);
+    return res.json();
   };
 
   let low = estimate.count;
   let high = Math.ceil(low + estimate.growthPerYear * (Date.now() - estimate.date) / (365.25 * 24 * 60 * 60 * 1000));
+  let users;
 
-  while (await next(high)) {
-    low = high;
-    high += high;
-  }
+  while ((users = await get(high)).length === 100) high += high - estimate.count;
+  if (users.length) return users.at(-1);
 
-  while (high - low > 1) {
+  while (high - low > 100) {
     const mid = low + Math.floor((high - low) / 2);
-    if (await next(mid)) low = mid;
-    else high = mid;
+    users = await get(mid);
+    if (!users.length) high = mid;
+    else if (users.length < 100) return users.at(-1);
+    else low = users.at(-1).id;
   }
 
-  return next(low);
+  return (await get(low)).at(-1);
 }
 
 function get_color(id) {
