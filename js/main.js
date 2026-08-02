@@ -1,3 +1,35 @@
+const estimate = {
+  date: new Date('2026-08-01'),
+  count: 312018370,
+  growthPerYear: 50000000
+};
+
+async function findLargestUserId() {
+  const next = async since => {
+    let url = `https://api.github.com/users?since=${since}&per_page=1`;
+    console.log('fetching', url);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+    return (await res.json())[0] || null;
+  };
+
+  let low = estimate.count;
+  let high = Math.ceil(low + estimate.growthPerYear * (Date.now() - estimate.date) / (365.25 * 24 * 60 * 60 * 1000));
+
+  while (await next(high)) {
+    low = high;
+    high += high;
+  }
+
+  while (high - low > 1) {
+    const mid = low + Math.floor((high - low) / 2);
+    if (await next(mid)) low = mid;
+    else high = mid;
+  }
+
+  return next(low);
+}
+
 function get_color(id) {
   const hash = md5(String(id));
   const m = hash.split('').map(c => parseInt(c,16));
@@ -562,8 +594,13 @@ window.onload = function() {
 
   document.getElementById('canvas').addEventListener('click', resetFields);
 
+  document.getElementById('maxId').value = estimate.count;
+
   document.getElementById('getMaxId').addEventListener('click', e=>{
-    document.getElementById('maxId').value = 350000000;
+    findLargestUserId().then(user => {
+      console.log('largest user found', user.id, user.login);
+      document.getElementById('maxId').value = user.id;
+    });
   });
 
   document.getElementById('search').addEventListener('click', search_image);
