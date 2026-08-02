@@ -31,6 +31,9 @@ async function findLargestUserId() {
   return (await get(low)).at(-1);
 }
 
+const hexToRGB = (h) => ({ r: parseInt(h[1]+h[2],16), g: parseInt(h[3]+h[4],16), b: parseInt(h[5]+h[6],16) });
+const rgbToHex = (r, g, b) => '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+
 function get_color(id) {
   const hash = md5(String(id));
   const m = hash.split('').map(c => parseInt(c,16));
@@ -135,8 +138,6 @@ function find_targets(targetHex, maskHex, targetColor) {
                 select.selectedIndex = 1;
                 select.dispatchEvent(new Event('change', { bubbles: true }));
               }
-
-              document.getElementById('search').disabled = false;
           }
       };
 
@@ -164,66 +165,7 @@ function draw_grid(grid, color) {
   }
 }
 
-
-function update_color() {
-  let canvas = document.getElementById('canvas');
-  let ctx = canvas.getContext('2d', { willReadFrequently: true });
-    
-  // Read 5x5 grid, each cell 70px
-  const gridSize = 5;
-  const cellSize = 70;
-  const colors = [];
-  const borderWidth = 35;
-  
-  for (let row = 0; row < gridSize; row++) {
-    const rowColors = [];
-    for (let col = 0; col < gridSize; col++) {
-      const px = col * cellSize + cellSize/2;
-      const py = row * cellSize + cellSize/2;
-      const pixel = ctx.getImageData(borderWidth+px, borderWidth+py, 1, 1).data;
-      rowColors.push({
-        r: pixel[0],
-        g: pixel[1],
-        b: pixel[2]
-      });
-    }
-    colors.push(rowColors);
-  }
-
-  //console.log(colors);
-
-  let targetColor = 255;
-
-  // Convert to text grid
-  const grid = colors.map(row => 
-    row.map(color => {
-      const brightness = (color.r + color.g + color.b) / 3;
-      if (color.r!=240) targetColor = color;
-      return (brightness == 240 || brightness == 255) ? 0 : 1;
-    }).join('')
-  );
-
-  function rgbToHex(r, g, b) {
-      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  }
-
-  let color = rgbToHex(targetColor.r, targetColor.g, targetColor.b);
-
-  document.getElementById('fgColor').value = color;
-  editor.setForegroundColor(color);
-
-  draw_grid(grid, targetColor);
-
-  return [grid, targetColor];
-}
-
-function search_image() {
-
-  document.getElementById('search').disabled = true;
-
-  let [grid, targetColor] = update_color();
-
-  console.log(grid.join('\n'));
+function get_target_mask(grid, targetColor) {
 
   target='fff00000000000000000000000000000';
     mask='11111111111111100000000000000000';
@@ -255,7 +197,7 @@ function search_image() {
       return [h / 6, l, s];
   }
 
-  console.log('target color', targetColor);
+  //console.log('target color', targetColor);
 
   [h,l,s] = rgbToHls(targetColor.r, targetColor.g, targetColor.b);
 
@@ -293,7 +235,7 @@ function search_image() {
 
   target = nibblesToHex(nibbles);
 
-  console.log('target', target);
+  //console.log('target', target);
 
   // mask should be relaxed because of rgb rounding errors
   // looks like it doesn't work reliably, need specific bruteforcer
@@ -301,6 +243,76 @@ function search_image() {
   //mask='1111111111111110000000000fc0c0c0';
 
   mask='1111111111111110000000000fc00000'; // this works better (for jasonlong and stewardlord)
+
+  return [target, mask];
+}
+
+
+function update_color() {
+  let canvas = document.getElementById('canvas');
+  let ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
+  // Read 5x5 grid, each cell 70px
+  const gridSize = 5;
+  const cellSize = 70;
+  const colors = [];
+  const borderWidth = 35;
+  
+  for (let row = 0; row < gridSize; row++) {
+    const rowColors = [];
+    for (let col = 0; col < gridSize; col++) {
+      const px = col * cellSize + cellSize/2;
+      const py = row * cellSize + cellSize/2;
+      const pixel = ctx.getImageData(borderWidth+px, borderWidth+py, 1, 1).data;
+      rowColors.push({
+        r: pixel[0],
+        g: pixel[1],
+        b: pixel[2]
+      });
+    }
+    colors.push(rowColors);
+  }
+
+  //console.log(colors);
+
+  let colorValue = document.getElementById('color').value;
+  let targetColor = hexToRGB(colorValue);
+
+  // Convert to text grid
+  const grid = colors.map(row => 
+    row.map(color => {
+      const brightness = (color.r + color.g + color.b) / 3;
+      if (color.r!=240) targetColor = color;
+      return (brightness == 240 || brightness == 255) ? 0 : 1;
+    }).join('')
+  );
+
+  let color = rgbToHex(targetColor.r, targetColor.g, targetColor.b);
+
+  //console.log('colorValue', colorValue, 'targetColor', targetColor, 'color', color);
+
+  document.getElementById('color').value = color;
+  editor.setForegroundColor(color);
+
+  //console.log(grid.join('\n'));
+
+  draw_grid(grid, targetColor);
+
+  let [target, mask] = get_target_mask(grid, targetColor);
+
+  document.getElementById('target').value = target;
+  document.getElementById('mask').value = mask;
+
+  return [grid, targetColor];
+}
+
+function search_image() {
+  //let [grid, targetColor] = update_color();
+  //let [target, mask] = get_target_mask(grid, targetColor);
+
+  let target = document.getElementById('target').value;
+  let mask =   document.getElementById('mask').value;
+  let targetColor = hexToRGB(document.getElementById('color').value);
 
   find_targets(target, mask, targetColor);
 }
@@ -317,7 +329,6 @@ function upload_image() {
   input.type = 'file';
   input.accept = 'image/*';
   input.style.display = 'none';
-
 
   input.onchange = function() {
     const file = this.files[0];
@@ -415,19 +426,9 @@ function generateInternal(hash) {
 
 function generate() {
   const id = document.getElementById('userid').value;
-
-  //let id = 852547;
-
   const hash = md5(String(id));
-
   document.getElementById('hash').value = hash;
-
   generateInternal(hash);
-
-  //document.getElementById('lookup').style.visibility = 'visible';
-  //document.getElementById('lookup').href = `https://api.github.com/user/${id}`;
-
-  document.getElementById('getName').disabled = document.getElementById('username').value!='';
 }
 
 async function updateLink(username) {
@@ -438,8 +439,19 @@ async function updateLink(username) {
   }
 }
 
-async function loadUserName() {
-  document.getElementById('fetch').disabled = true;
+async function fetchID() {
+  let username = document.getElementById('username').value;
+  try {
+    const id = await getId(username);
+    document.getElementById('userid').value = id;
+    generate();
+    updateLink(username);
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function fetchUsername() {
   let uname_ctrl = document.getElementById('username');
   let uid_ctrl = document.getElementById('userid');
   const id = uid_ctrl.value;
@@ -454,8 +466,6 @@ async function loadUserName() {
     location.hash = username;
   } catch (e) {
     alert(e.message);
-  } finally {
-    document.getElementById('fetch').disabled = false;
   }
 }
 
@@ -470,6 +480,16 @@ async function loadUserAndGenerate(username) {
     updateLink(username);
   } catch (e) {
     alert(e.message);
+  }
+}
+
+function enforceRange(input) {
+  const min = parseFloat(input.min);
+  const max = parseFloat(input.max);
+  let value = parseFloat(input.value);
+  if (!isNaN(value)) {
+    if (value < min) input.value = min;
+    if (value > max) input.value = max;
   }
 }
 
@@ -488,7 +508,6 @@ window.onload = function() {
       location.hash = username;
       uid_ctrl.value = id;
       uid_ctrl.select();
-      document.getElementById('fetchBtn').disabled = true;
       generate();
       updateLink(username);
     } else if (id){
@@ -499,7 +518,6 @@ window.onload = function() {
       //uid_ctrl.select();
       //select_ctrl.select();
 
-      document.getElementById('fetchBtn').disabled = true;
       generate();
       updateLink();
     }
@@ -507,41 +525,10 @@ window.onload = function() {
 
   function resetUsername(preserveHash) {
     document.getElementById('username').value = '';
-    document.getElementById('fetchBtn').disabled = true;
     if (!preserveHash) location.hash = '';
     document.getElementById('select').selectedIndex = 0;
     updateLink();
   }
-
-  document.getElementById('randomize').onclick = async e => {
-    e.preventDefault();
-    resetUsername();
-    let maxId = parseInt(document.getElementById('maxId').value);
-    uid_ctrl.value = Math.floor(Math.random() * maxId);
-    uid_ctrl.select();
-    generateOnChange();
-  }
-
-  document.getElementById('idForm').onsubmit = async e => {
-    e.preventDefault();
-    loadUserName();
-  }
-
-  document.getElementById('nameForm').onsubmit = async e => {
-    e.preventDefault();
-    try {
-      document.getElementById('fetchBtn').disabled = true;
-      let username = uname_ctrl.value.trim();
-      location.hash = username;
-      const id = await getId(username);
-      uid_ctrl.value = id;
-      uid_ctrl.select();
-      generate();
-      updateLink(username);
-    } catch(e) {
-      alert(e.message);
-    }
-  };
 
   'input keyup change'.split(' ').forEach(function(e){
     uid_ctrl.addEventListener(e, onChange, false);
@@ -550,7 +537,6 @@ window.onload = function() {
   uid_ctrl.addEventListener('input', resetUsername);
 
   uname_ctrl.addEventListener('input', function() {
-    document.getElementById('fetchBtn').disabled = uname_ctrl.value.length==0;
     document.getElementById('select').selectedIndex = 0;
     updateLink();
   })
@@ -585,15 +571,18 @@ window.onload = function() {
       pixelSize: 70,
       backgroundColor: '#f0f0f0',
       foregroundColor: '#9FA9DD',
-      mirrorHorizontal: false,
+      mirrorHorizontal: true,
       borderWidth: 35,
+      callback: update_color,
   });
 
-  document.getElementById('fgColor').addEventListener('input', (e) => {
+  document.getElementById('color').addEventListener('input', (e) => {
       editor.setForegroundColor(e.target.value);
   });
 
   document.getElementById('canvas').addEventListener('click', resetFields);
+
+  document.getElementById('canvas').addEventListener('click', update_color);
 
   let estId = Math.ceil(estimate.count + estimate.growthPerYear * (Date.now() - estimate.date) / (365.25 * 24 * 60 * 60 * 1000));
   document.getElementById('maxId').value = Math.ceil(estId / estimate.growthPerYear) * estimate.growthPerYear;
@@ -605,6 +594,38 @@ window.onload = function() {
     });
   });
 
-  document.getElementById('search').addEventListener('click', search_image);
-  document.getElementById('fetch').addEventListener('click', loadUserName);
+  async function random(e) {
+    e.preventDefault();
+    resetUsername();
+    let maxId = parseInt(document.getElementById('maxId').value);
+    uid_ctrl.value = Math.floor(Math.random() * maxId);
+    uid_ctrl.select();
+    generateOnChange();
+  }
+
+  document.querySelectorAll('[data-fn]').forEach(c => { 
+    c.onclick = e => { 
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        eval(e.target.dataset.fn + '(e)');
+      } catch(err) {
+        console.warn('Function not found', e.target.dataset.fn);
+      }
+      return false;
+    };
+  });
+
+  document.querySelectorAll('[data-submit]').forEach(c => { 
+    c.onkeydown = e => { 
+      if (e.key !== 'Enter') return true;
+      try {
+        eval(e.target.dataset.submit + '(e)');
+      } catch(err) {
+        console.warn('Function not found', e.target.dataset.fn);
+      }
+      return false;
+    };
+  });
+
 }

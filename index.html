@@ -76,102 +76,91 @@
   tsw.onchange = _ => document.documentElement.dataset.bsTheme = localStorage.theme = tsw.checked ? 'dark' : 'light';
 </script>
 
-<main class="py-4">
+<main class="pt-3">
 
 <div class="container">
 <div class="row justify-content-center">
 <div class="col-xl-10">
 
-
-<div class="row mb-3">
-  <label for="select" class="col-sm-3 col-form-label fw-bold">Generate</label>
-  <div class="col-sm-9">
-    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center gap-3">
-      <div class="btn-group flex-grow-1" role="group">
-        <button type="button" class="btn btn-outline-primary" id="randomize">Randomize</button>
-        <button class="btn btn-outline-primary" type="button" id="fetch">Fetch Username</button>
-        <button class="btn btn-outline-primary" type="button" id="search">Image Search</button>
-      </div>
-      <select id="select" class="form-select flex-grow-1" style="min-width:120px;width:auto;flex-shrink:0;">
-        <option></option>
-        <option value="852547">joric</option>
-        <option value="218503">stewartlord</option>
-        <option value="6104">jasonlong</option>
-        <option value="197742">infusion</option>
-        <option value="1873201">ppuleo</option>
-        <option value="54293946">wjhbr</option>
-        <option value="260864">260864</option>
-        <option value="852547">852547</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-<div class="row mb-3">
-  <label for="maxId" class="col-sm-3 col-form-label fw-bold">Largest User ID</label>
-  <div class="col-sm-9">
-    <div class="input-group">
-      <input type="number" class="form-control flex-grow-1" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000" onchange="enforceRange(this)">
-      <button class="btn" title="Fetch Largest User ID" id="getMaxId">&#x21BB;</button>
-    </div>
-  </div>
-</div>
-
-<script>
-function enforceRange(input) {
-  const min = parseFloat(input.min);
-  const max = parseFloat(input.max);
-  let value = parseFloat(input.value);
-  if (!isNaN(value)) {
-    if (value < min) input.value = min;
-    if (value > max) input.value = max;
-  }
-}
-</script>
-
 <div class="row mb-3">
   <label for="username" class="col-sm-3 col-form-label fw-bold">Username</label>
   <div class="col-sm-9">
-    <form id="nameForm">
     <div class="input-group">
-      <input type="text" class="form-control" id="username" placeholder="Username" value="joric" autocomplete="off">
-      <button class="btn" title="Fetch ID by Username" id="fetchBtn">&#x21BB;</button>
+      <input type="text" class="form-control" id="username" placeholder="Username" value="joric" autocomplete="off" data-submit="fetchID">
+      <button class="btn" title="Fetch Username from ID" data-fn="fetchUsername">&#x21BB;</button>
     </div>
-    </form>
   </div>
 </div>
 
 <div class="row mb-3">
-  <label for="userid" class="col-sm-3 col-form-label fw-bold">User ID</label>
+  <label for="userid" class="col-sm-3 col-form-label fw-bold">User ID / Largest ID</label>
   <div class="col-sm-9">
-    <form id="idForm">
-    <div class="input-group">
-      <input type="number" class="form-control flex-grow-1" id="userid" placeholder="User ID" inputmode="numeric" pattern="[0-9]*" value="852547">
-      <button class="btn" title="Fetch Username by ID" id="getName">&#x21BB;</button>
+
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center gap-3">
+
+      <div class="input-group">
+        <input type="number" class="form-control" id="userid" placeholder="User ID" inputmode="numeric" pattern="[0-9]*" value="852547" data-submit="fetchUsername">
+        <button class="btn" title="Random ID" data-fn="random">&#x21BB;</button>
+      </div>
+
+      <div class="input-group">
+        <input type="number" class="form-control" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000" onchange="enforceRange(this)">
+        <button class="btn" title="Fetch Largest User ID" id="getMaxId">&#x21BB;</button>
+      </div>
+
     </div>
-    </form>
+
   </div>
 </div>
 
 <div class="row mb-3">
   <label for="hash" class="col-sm-3 col-form-label fw-bold">Hash</label>
   <div class="col-sm-9">
-    <input type="text" class="form-control" id="hash" placeholder="Hash" readonly="" value="b174308173bc8ca5843c8d896a3dda07" disabled="">
+    <input type="text" class="form-control font-monospace" id="hash" placeholder="Hash" readonly="" value="b174308173bc8ca5843c8d896a3dda07" disabled="">
   </div>
 </div>
 
 <div class="row mb-3">
-  <label for="fgColor" class="col-sm-3 col-form-label fw-bold">Image Color</label>
+  <label for="hash" class="col-sm-3 col-form-label fw-bold">Target / Mask</label>
   <div class="col-sm-9">
-    <div class="btn-group" role="group">
-      <input type="color" id="fgColor" value="#9FA9DD"  class="form-control form-control-color">
-      <button class="btn" type="button" id="upload" onclick="upload_image()">Upload Image</button>
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center gap-3">
+      <input type="text" class="form-control font-monospace" id="target" placeholder="Target" inputmode="numeric" pattern="[0-9a-fA-F]*">
+      <input type="text" class="form-control font-monospace" id="mask" placeholder="Mask" inputmode="numeric" pattern="[0-9a-fA-F]*">
     </div>
   </div>
 </div>
 
+
 <div class="row mb-3">
   <label class="col-sm-3 col-form-label fw-bold">Image</label>
+  <div class="col-sm-9">
+
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center gap-3">
+
+    <div class="btn-group flex-grow-1" role="group">
+      <input class="form-control form-control-color btn btn-outline-secondary col-1" type="color" id="color" value="#9FA9DD">
+      <button class="btn btn-outline-secondary" type="button" data-fn="upload_image">Upload Image</button>
+      <button class="btn btn-outline-secondary" type="button" data-fn="search_image">Search</button>
+    </div>
+    <select id="select" class="form-select flex-grow-1" style="min-width:120px;width:auto;flex-shrink:0;">
+      <option></option>
+      <option value="852547">joric</option>
+      <option value="218503">stewartlord</option>
+      <option value="6104">jasonlong</option>
+      <option value="197742">infusion</option>
+      <option value="1873201">ppuleo</option>
+      <option value="54293946">wjhbr</option>
+      <option value="260864">260864</option>
+      <option value="852547">852547</option>
+    </select>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="row mb-3">
+  <label class="col-sm-3 col-form-label fw-bold"></label>
   <div class="col-sm-9">
     <canvas id="canvas" width="420" height="420" class="d-block"></canvas>
   </div>
