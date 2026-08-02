@@ -43,7 +43,6 @@ const BitmapEditor = (function() {
             this.fgRgb = hexToRgb(this.fg);
             this.mh = options.mirrorHorizontal;
             this.bw = options.borderWidth;
-            this.callback = options.callback;
 
             this.canvas = canvas;
             this.canvas.width = this.w * this.ps + this.bw * 2;
@@ -287,8 +286,6 @@ const BitmapEditor = (function() {
         }
 
         saveToHistory() {
-            if (this.callback) callback();
-
             this.history = this.history.slice(0, this.historyIndex + 1);
             this.history.push(this.pixels.map(row => [...row]));
             this.historyIndex++;

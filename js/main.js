@@ -69,10 +69,10 @@ function filter_by_color(results, targetColor) {
   return results;
 }
 
-function find_targets(targetHex, maskHex, targetColor) {
-  const maxId = parseInt(document.getElementById('maxId').value); //350 million users now
+async function find_targets(targetHex, maskHex, targetColor) {
+  const maxId = parseInt(document.getElementById('maxId').value);
 
-  const numThreads = (navigator.hardwareConcurrency || 4) * 2; // 2x oversubscribing
+  const numThreads = (navigator.hardwareConcurrency || 4) * 2;
   const chunkSize = Math.ceil(maxId / numThreads);
   
   let completedWorkers = 0;
@@ -83,10 +83,11 @@ function find_targets(targetHex, maskHex, targetColor) {
   const select = document.getElementById('select');
   select.innerHTML = '<option>Searching...</option>';
 
-  count = 0;
-  results = [];
+  let count = 0;
+  let results = [];
 
-  for (let i = 0; i < numThreads; i++) {
+  return new Promise((resolve) => {
+    for (let i = 0; i < numThreads; i++) {
       const start = i * chunkSize;
       const end = Math.min(start + chunkSize, maxId);
       if (start >= maxId) break;
@@ -94,56 +95,43 @@ function find_targets(targetHex, maskHex, targetColor) {
       const worker = new Worker('wasm/worker.js', { type: 'module' });
       
       worker.onmessage = (e) => {
+        if (e.data.result?.length) {
+          count += e.data.result.length;
+          e.data.result.map(x => results.push(x));
+        }
 
-          if (e.data.result?.length) {
-              //output.appendChild(document.createTextNode(e.data.result.join('\n') + '\n'));
-              //console.log(e.data.result.join('\n'));
-              //e.data.result.map(x=>results.push(String(x)));
-              //console.log(`Collected ${results.length} results...`);
-              //console.log(`Collected ${e.data.result.length} results...`);
+        completedWorkers++;
+        worker.terminate();
 
-              count += e.data.result.length;
-              e.data.result.map(x=>results.push(x));
+        if (completedWorkers === numThreads) {
+          const elapsed = performance.now() - startTime;
+          const rate = Math.round((maxId / elapsed) * 1000);
+          console.log(`Completed in ${elapsed.toFixed(2)} ms\nRate: ${rate} IDs/sec`);
+          console.log('Total results', count);
+
+          results = filter_by_color(results, targetColor);
+          console.log(`Filtered by color, ${results.length} result(s).`);
+
+          for (const id of results.sort((a, b) => a - b).slice(0, 500)) {
+            const option = document.createElement('option');
+            option.value = String(id);
+            option.text = String(id);
+            select.appendChild(option);
           }
 
-          completedWorkers++;
-          worker.terminate();
-
-          if (completedWorkers === numThreads) {
-              const elapsed = performance.now() - startTime;
-              const rate = Math.round((maxId / elapsed) * 1000);
-
-              const stats = `Completed in ${elapsed.toFixed(2)} ms\nRate: ${rate} IDs/sec\n`;
-              //output.appendChild(document.createTextNode(stats));
-
-              console.log(stats);
-
-              console.log('Total results', count);
-
-              results = filter_by_color(results, targetColor);
-
-              console.log(`Filtered by color, ${results.length} result(s).`);
-
-              for (const id of results.sort((a, b) => a - b).slice(0, 500)) {
-                  const text=String(id);
-                  const option = document.createElement('option');
-                  option.value = text;
-                  option.text = text;
-                  select.appendChild(option);
-              }
-
-              select.options[0].text = `${select.options.length-1} result(s)`;
-              select.options[0].value = '';
-              if (select.options.length>1) {
-                select.selectedIndex = 1;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-              }
+          select.options[0].text = `${select.options.length-1} result(s)`;
+          select.options[0].value = '';
+          if (select.options.length > 1) {
+            select.selectedIndex = 1;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
           }
+          resolve(results);
+        }
       };
 
       worker.postMessage({ start, end, targetHex, maskHex });
-  }
-
+    }
+  });
 }
 
 function draw_grid(grid, color) {
@@ -248,7 +236,7 @@ function get_target_mask(grid, targetColor) {
 }
 
 
-function update_color() {
+function update_color(updateTargetOnly=false) {
   let canvas = document.getElementById('canvas');
   let ctx = canvas.getContext('2d', { willReadFrequently: true });
     
@@ -287,6 +275,10 @@ function update_color() {
     }).join('')
   );
 
+  if (updateTargetOnly) {
+    targetColor = hexToRGB(colorValue);
+  }
+
   let color = rgbToHex(targetColor.r, targetColor.g, targetColor.b);
 
   //console.log('colorValue', colorValue, 'targetColor', targetColor, 'color', color);
@@ -296,7 +288,9 @@ function update_color() {
 
   //console.log(grid.join('\n'));
 
-  draw_grid(grid, targetColor);
+  if (!updateTargetOnly) {
+    draw_grid(grid, targetColor);
+  }
 
   let [target, mask] = get_target_mask(grid, targetColor);
 
@@ -306,15 +300,15 @@ function update_color() {
   return [grid, targetColor];
 }
 
-function search_image() {
-  //let [grid, targetColor] = update_color();
-  //let [target, mask] = get_target_mask(grid, targetColor);
+function update_target() {
+  update_color(true);
+}
 
+async function search_image() {
   let target = document.getElementById('target').value;
-  let mask =   document.getElementById('mask').value;
+  let mask = document.getElementById('mask').value;
   let targetColor = hexToRGB(document.getElementById('color').value);
-
-  find_targets(target, mask, targetColor);
+  await find_targets(target, mask, targetColor);
 }
 
 function resetFields() {
@@ -573,7 +567,6 @@ window.onload = function() {
       foregroundColor: '#9FA9DD',
       mirrorHorizontal: true,
       borderWidth: 35,
-      callback: update_color,
   });
 
   document.getElementById('color').addEventListener('input', (e) => {
@@ -582,7 +575,7 @@ window.onload = function() {
 
   document.getElementById('canvas').addEventListener('click', resetFields);
 
-  document.getElementById('canvas').addEventListener('click', update_color);
+  document.getElementById('canvas').addEventListener('click', update_target);
 
   let estId = Math.ceil(estimate.count + estimate.growthPerYear * (Date.now() - estimate.date) / (365.25 * 24 * 60 * 60 * 1000));
   document.getElementById('maxId').value = Math.ceil(estId / estimate.growthPerYear) * estimate.growthPerYear;
@@ -604,14 +597,16 @@ window.onload = function() {
   }
 
   document.querySelectorAll('[data-fn]').forEach(c => { 
-    c.onclick = e => { 
+    c.onclick = async e => { 
       e.preventDefault();
       e.stopPropagation();
+      c.disabled = true;
       try {
-        eval(e.target.dataset.fn + '(e)');
+        await eval(e.target.dataset.fn + '(e)');
       } catch(err) {
         console.warn('Function not found', e.target.dataset.fn);
       }
+      c.disabled = false;
       return false;
     };
   });
