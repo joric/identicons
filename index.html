@@ -16,12 +16,14 @@
 <link href="css/bootstrap.min.css" rel="stylesheet"/>
 <script src="js/bootstrap.bundle.min.js"></script>
 
+<!-- Third-party / vendored libs: pixel-perfect identicon rendering, hashing, color math, and the bitmap editor widget -->
 <script src="js/pnglib.js"></script>
 <script src="js/md5.js"></script>
 <script src="js/identicon.js"></script>
 <script src="js/hsl2rgb.js"></script>
 <script src="js/bitmap-editor.js"></script>
 
+<!-- App logic (uses the libs above) -->
 <script src="js/main.js"></script>
 
 <style>
@@ -52,9 +54,9 @@
       <div class="col-xl-10 px-0">
         <div class="d-flex justify-content-between align-items-center">
           <a class="navbar-brand d-none d-lg-inline p-1" href=".">GitHub Identicons Generator and Finder</a>
-          
+
           <span id="link" class="text-center ms-1 ms-sm-0"><a href="https://github.com/joric">https://github.com/joric</a></span>
-          
+
           <div class="d-flex align-items-center gap-2 flex-shrink-0 me-5 me-sm-0">
             <label for="theme-switch">Dark Mode</label>
             <div class="form-check form-switch m-0">
@@ -68,12 +70,20 @@
 </nav>
 
 <script>
-  const tsw = document.querySelector('#theme-switch');
-  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = localStorage.theme === 'dark' || (!localStorage.theme && systemDark);
-  tsw.checked = isDark;
-  document.documentElement.dataset.bsTheme = isDark ? 'dark' : 'light';
-  tsw.onchange = _ => document.documentElement.dataset.bsTheme = localStorage.theme = tsw.checked ? 'dark' : 'light';
+  (function () {
+    const themeSwitch = document.querySelector('#theme-switch');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = localStorage.theme === 'dark' || (!localStorage.theme && systemPrefersDark);
+
+    themeSwitch.checked = isDark;
+    document.documentElement.dataset.bsTheme = isDark ? 'dark' : 'light';
+
+    themeSwitch.onchange = () => {
+      const theme = themeSwitch.checked ? 'dark' : 'light';
+      document.documentElement.dataset.bsTheme = theme;
+      localStorage.theme = theme;
+    };
+  })();
 </script>
 
 <main class="pt-3">
@@ -124,9 +134,9 @@
 
       <div class="btn-group w-100" role="group">
         <input class="form-control form-control-color btn btn-outline-secondary col-1" type="color" id="color" value="#9FA9DD">
-        <button class="btn btn-outline-secondary" type="button" data-fn="upload_image">Upload</button>
+        <button class="btn btn-outline-secondary" type="button" data-fn="uploadImage">Upload</button>
         <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#targetMaskCollapse" onclick="this.classList.toggle('btn-secondary');this.classList.toggle('btn-outline-secondary')">Settings</button>
-        <button class="btn btn-outline-secondary" type="button" data-fn="search_image">Search</button>
+        <button class="btn btn-outline-secondary" type="button" data-fn="searchImage">Search</button>
       </div>
 
       <div class="btn-group w-100" role="group">
@@ -147,8 +157,6 @@
   </div>
 
 </div>
-
-
 
 <div class="collapse" id="targetMaskCollapse">
 
@@ -173,7 +181,6 @@
     </div>
 </div>
 
-
 <div class="row mb-3">
   <label class="col-sm-3 col-form-label fw-bold">Target and Mask</label>
   <div class="col-sm-9">
@@ -186,17 +193,12 @@
 
 </div>
 
-
-
-
-
 <div class="row mb-3">
   <label class="col-sm-3 col-form-label fw-bold">Image</label>
   <div class="col-sm-9">
     <canvas id="canvas" width="420" height="420" class="d-block"></canvas>
   </div>
 </div>
-
 
 </div>
 </div>
