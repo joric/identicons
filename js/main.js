@@ -48,6 +48,10 @@ const RELAXED_COLOR_MASK = '1111111111111110000000000fc00000';
 
 const COLOR_MATCH_DELTA_THRESHOLD = 3; // max summed |dr|+|dg|+|db| to accept
 
+const USERNAME_FETCH_DEBOUNCE_MS = 500;
+
+let lastFetchTime = 0;
+
 /* ============================================================
  * Color utilities
  * ============================================================ */
@@ -553,6 +557,12 @@ async function fetchID() {
 }
 
 async function fetchUsername() {
+  const now = Date.now();
+  if (now - lastFetchTime < USERNAME_FETCH_DEBOUNCE_MS) {
+    return;
+  }
+  lastFetchTime = now;
+
   const usernameEl = document.getElementById('username');
   const useridEl = document.getElementById('userid');
   const id = useridEl.value;
@@ -566,8 +576,10 @@ async function fetchUsername() {
     clearTimeout(hashChangeTimer);
     window.location.hash = username;
     document.title = `${username} - ${defaultTitle}`;
+    return username;
   } catch (e) {
     console.log(e.message);
+    return null;
   }
 }
 
@@ -642,10 +654,18 @@ window.onload = function () {
       usernameEl.value = '';
       location.hash = id;
       useridEl.value = id;
+      option.title = id;
       generate();
       updateLink();
-      if (e.doFetch) {
-        fetchUsername();
+      //if (e.doFetch) 
+      {
+        (async () => {
+          const fetchedUsername = await fetchUsername();
+          if (fetchedUsername) {
+            option.text = fetchedUsername;
+            usernameEl.value = fetchedUsername;
+          }
+        })();
       }
     }
   };
