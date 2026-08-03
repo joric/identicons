@@ -391,7 +391,9 @@ function onChange(e) {
 }
 
 function generateOnChange() {
-  location.hash = document.getElementById('userid').value;
+  let id = document.getElementById('userid').value;
+  window.location.hash = id;
+  document.title = `${id} - ${defaultTitle}`;
   generate();
 }
 
@@ -465,7 +467,8 @@ async function fetchUsername() {
     generate();
     updateLink(username);
     clearTimeout(timeout);
-    location.hash = username;
+    window.location.hash = username;
+    document.title = `${username} - ${defaultTitle}`;
   } catch (e) {
     alert(e.message);
   }
@@ -494,6 +497,8 @@ function enforceRange(input) {
     if (value > max) input.value = max;
   }
 }
+
+let defaultTitle = null;
 
 window.onload = function() {
 
@@ -635,4 +640,5 @@ window.onload = function() {
     };
   });
 
+  defaultTitle = document.title;
 }
