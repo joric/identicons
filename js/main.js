@@ -535,7 +535,7 @@ async function searchImage() {
   if (select.options.length > 1) {
     select.selectedIndex = 1;
     let event = new Event('change', { bubbles: true });
-    event.fetchUsername = true;
+    event.doFetch = true;
     select.dispatchEvent(event);
   }
 }
@@ -644,7 +644,7 @@ window.onload = function () {
       useridEl.value = id;
       generate();
       updateLink();
-      if (e.fetchUsername) {
+      if (e.doFetch) {
         fetchUsername();
       }
     }
