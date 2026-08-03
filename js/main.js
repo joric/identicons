@@ -70,15 +70,23 @@ function filter_by_color(results, targetColor) {
 }
 
 async function find_targets(targetHex, maskHex, targetColor) {
+  const minId = parseInt(document.getElementById('minId').value);
   const maxId = parseInt(document.getElementById('maxId').value);
 
+  const minChunk = 8192;
+
+  if (maxId-minId < minChunk) {
+    console.log(`chunk size cannot be smaller than ${minChunk}`);
+    return;
+  }
+
   const numThreads = (navigator.hardwareConcurrency || 4) * 2;
-  const chunkSize = Math.ceil(maxId / numThreads);
-  
+  const chunkSize = Math.ceil((maxId - minId) / numThreads);
+
   let completedWorkers = 0;
   const startTime = performance.now();
 
-  console.log(`starting search, maxId: ${maxId}, target: ${targetHex}, mask: ${maskHex}`);
+  console.log(`starting search, minId: ${minId}, maxId: ${maxId}, target: ${targetHex}, mask: ${maskHex}`);
 
   const select = document.getElementById('select');
   select.innerHTML = '<option>Searching...</option>';
@@ -88,7 +96,7 @@ async function find_targets(targetHex, maskHex, targetColor) {
 
   return new Promise((resolve) => {
     for (let i = 0; i < numThreads; i++) {
-      const start = i * chunkSize;
+      const start = minId + i * chunkSize;
       const end = Math.min(start + chunkSize, maxId);
       if (start >= maxId) break;
 
@@ -579,6 +587,10 @@ window.onload = function() {
 
   let estId = Math.ceil(estimate.count + estimate.growthPerYear * (Date.now() - estimate.date) / (365.25 * 24 * 60 * 60 * 1000));
   document.getElementById('maxId').value = Math.ceil(estId / estimate.growthPerYear) * estimate.growthPerYear;
+
+  document.getElementById('getMinId').addEventListener('click', e=>{
+    document.getElementById('minId').value = 0;
+  });
 
   document.getElementById('getMaxId').addEventListener('click', e=>{
     findLargestUserId().then(user => {

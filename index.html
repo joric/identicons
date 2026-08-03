@@ -93,7 +93,7 @@
 </div>
 
 <div class="row mb-3">
-  <label for="userid" class="col-sm-3 col-form-label fw-bold">User ID / Largest ID</label>
+  <label for="userid" class="col-sm-3 col-form-label fw-bold">User ID</label>
   <div class="col-sm-9">
 
     <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center gap-3">
@@ -101,11 +101,6 @@
       <div class="input-group">
         <input type="number" class="form-control" id="userid" placeholder="User ID" inputmode="numeric" pattern="[0-9]*" value="852547" data-submit="fetchUsername">
         <button class="btn" title="Random ID" data-fn="random">&#x21BB;</button>
-      </div>
-
-      <div class="input-group">
-        <input type="number" class="form-control" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000" onchange="enforceRange(this)">
-        <button class="btn" title="Fetch Largest User ID" id="getMaxId">&#x21BB;</button>
       </div>
 
     </div>
@@ -130,7 +125,7 @@
       <div class="btn-group w-100" role="group">
         <input class="form-control form-control-color btn btn-outline-secondary col-1" type="color" id="color" value="#9FA9DD">
         <button class="btn btn-outline-secondary" type="button" data-fn="upload_image">Upload</button>
-        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#targetMaskCollapse" onclick="this.classList.toggle('btn-secondary');this.classList.toggle('btn-outline-secondary')">Target / Mask</button>
+        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#targetMaskCollapse" onclick="this.classList.toggle('btn-secondary');this.classList.toggle('btn-outline-secondary')">Options</button>
         <button class="btn btn-outline-secondary" type="button" data-fn="search_image">Search</button>
       </div>
 
@@ -149,17 +144,50 @@
       </div>
 
     </div>
-
-    <div class="collapse" id="targetMaskCollapse">
-      <div class="d-flex flex-column flex-xl-row gap-3 pt-3">
-        <input type="text" class="form-control font-monospace" id="target" placeholder="Target">
-        <input type="text" class="form-control font-monospace" id="mask" placeholder="Mask">
-      </div>
-    </div>
-
   </div>
 
 </div>
+
+
+
+<div class="collapse" id="targetMaskCollapse">
+
+<div class="row mb-3">
+  <label class="col-sm-3 col-form-label fw-bold">ID Bounds</label>
+  <div class="col-sm-9">
+
+      <div class="d-flex flex-column flex-xl-row gap-3">
+
+        <div class="input-group">
+          <input type="number" class="form-control" id="minId" min="0" max="4294967296" placeholder="Min ID" inputmode="numeric" pattern="[0-9]*" value="0" onchange="enforceRange(this)" title="Min ID">
+          <button class="btn" title="Reset to Zero" id="getMinId">&#x21BB;</button>
+        </div>
+
+        <div class="input-group">
+          <input type="number" class="form-control" id="maxId" min="1" max="4294967296" placeholder="Max ID" inputmode="numeric" pattern="[0-9]*" value="350000000" onchange="enforceRange(this)"  title="Max ID">
+          <button class="btn" title="Fetch Largest User ID" id="getMaxId">&#x21BB;</button>
+        </div>
+
+      </div>
+
+    </div>
+</div>
+
+
+<div class="row mb-3">
+  <label class="col-sm-3 col-form-label fw-bold">Target and Mask</label>
+  <div class="col-sm-9">
+      <div class="d-flex flex-column flex-xl-row gap-3">
+        <input type="text" class="form-control font-monospace" id="target" placeholder="Target" title="Target">
+        <input type="text" class="form-control font-monospace" id="mask" placeholder="Mask" title="Mask ">
+      </div>
+    </div>
+</div>
+
+</div>
+
+
+
 
 
 <div class="row mb-3">
