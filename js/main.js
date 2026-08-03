@@ -534,7 +534,9 @@ async function searchImage() {
   select.options[0].value = '';
   if (select.options.length > 1) {
     select.selectedIndex = 1;
-    select.dispatchEvent(new Event('change', { bubbles: true }));
+    let event = new Event('change', { bubbles: true });
+    event.fetchUsername = true;
+    select.dispatchEvent(event);
   }
 }
 
@@ -565,7 +567,7 @@ async function fetchUsername() {
     window.location.hash = username;
     document.title = `${username} - ${defaultTitle}`;
   } catch (e) {
-    alert(e.message);
+    console.log(e.message);
   }
 }
 
@@ -642,6 +644,9 @@ window.onload = function () {
       useridEl.value = id;
       generate();
       updateLink();
+      if (e.fetchUsername) {
+        fetchUsername();
+      }
     }
   };
 
