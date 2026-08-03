@@ -640,16 +640,20 @@ window.onload = function () {
 
   selectEl.onchange = (e) => {
     const option = e.target.options[e.target.selectedIndex];
-    const username = option.text;
+    const text = option.text;
     const id = e.target.value;
 
-    if (username && id && username !== id) {
-      usernameEl.value = username;
-      location.hash = username;
+    let hasText = text && id && text !== id;
+    let validText = text && !new RegExp(' [([]').test(text);
+
+    if (hasText && validText) {
+      usernameEl.value = text;
+      location.hash = text;
       useridEl.value = id;
       useridEl.select();
       generate();
-      updateLink(username);
+      updateLink(text);
+
     } else if (id) {
       usernameEl.value = '';
       location.hash = id;
@@ -657,16 +661,19 @@ window.onload = function () {
       option.title = id;
       generate();
       updateLink();
-      //if (e.doFetch) 
-      {
+
+      if (validText) { // && e.doFetch
         (async () => {
           const fetchedUsername = await fetchUsername();
           if (fetchedUsername) {
             option.text = fetchedUsername;
             usernameEl.value = fetchedUsername;
+          } else {
+            option.text = `${id} [Not Found]`;
           }
         })();
       }
+
     }
   };
 
