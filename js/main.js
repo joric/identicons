@@ -193,12 +193,13 @@ const GitHubApi = {
   },
 
   async getUsernameById(id) {
-    const url = `https://api.github.com/user/${id}`;
-    console.log('fetching username', url);
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Could not fetch user (${res.status})`);
-    const data = await res.json();
-    console.log('fetched id', id, 'username', data.login);
+    const response = await fetch(`https://api.github.com/user/${id}`);
+    if (!response.ok) {
+      const error = new Error(`Could not fetch user (${response.status})`);
+      error.status = response.status;
+      throw error;
+    }
+    const data = await response.json();
     return data.login;
   },
 
@@ -558,15 +559,14 @@ async function fetchID() {
 
 async function fetchUsername() {
   const now = Date.now();
-  if (now - lastFetchTime < USERNAME_FETCH_DEBOUNCE_MS) {
-    return;
-  }
+  if (now - lastFetchTime < USERNAME_FETCH_DEBOUNCE_MS) return { success: false, error: 'throttled', status: 429 };
   lastFetchTime = now;
 
   const usernameEl = document.getElementById('username');
   const useridEl = document.getElementById('userid');
   const id = useridEl.value;
   console.log('trying to fetch', id);
+
   try {
     const username = await GitHubApi.getUsernameById(id);
     usernameEl.value = username;
@@ -576,10 +576,10 @@ async function fetchUsername() {
     clearTimeout(hashChangeTimer);
     window.location.hash = username;
     document.title = `${username} - ${defaultTitle}`;
-    return username;
+    return { success: true, username, status: 200 };
   } catch (e) {
-    console.log(e.message);
-    return null;
+    let status = e.status || e.response?.status || e.statusCode || e.code || 500;
+    return { success: false, error: e.message, status };
   }
 }
 
@@ -664,12 +664,11 @@ window.onload = function () {
 
       if (validText) { // && e.doFetch
         (async () => {
-          const fetchedUsername = await fetchUsername();
-          if (fetchedUsername) {
-            option.text = fetchedUsername;
-            usernameEl.value = fetchedUsername;
+          const result = await fetchUsername();
+          if (result && result.success) {
+            option.text = usernameEl.value = result.username;
           } else {
-            option.text = `${id} [null]`;
+            option.text = `${id} [${result.status}]`;
           }
         })();
       }
