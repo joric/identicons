@@ -669,7 +669,7 @@ window.onload = function () {
             option.text = fetchedUsername;
             usernameEl.value = fetchedUsername;
           } else {
-            option.text = `${id} [Not Found]`;
+            option.text = `${id} [404]`;
           }
         })();
       }
