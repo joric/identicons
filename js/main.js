@@ -630,7 +630,7 @@ function onUserIdChangedDebounced() {
   generate();
 
   clearTimeout(autoFetchTimer);
-  //autoFetchTimer = setTimeout(fetchUsername, AUTO_FETCH_DEBOUNCE_MS); // commented out for now, API limit is too low
+  autoFetchTimer = setTimeout(fetchUsername, AUTO_FETCH_DEBOUNCE_MS); // comment out, if API limit is too low
 }
 
 function onUserIdInput() {
