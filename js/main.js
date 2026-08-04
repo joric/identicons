@@ -632,8 +632,8 @@ function onUserIdChangedDebounced() {
   window.location.hash = id;
   document.title = `${id} - ${defaultTitle}`;
   generate();
-
   clearTimeout(autoFetchTimer);
+  if (document.getElementById('username').value) return;
   autoFetchTimer = setTimeout(fetchUsername, AUTO_FETCH_DEBOUNCE_MS); // comment out if API limit is too low
 }
 
