@@ -408,6 +408,7 @@ function resetFields() {
 
 function resetUsername(preserveHash) {
   document.getElementById('username').value = '';
+  document.getElementById('username').placeholder = 'Username';
   if (!preserveHash) location.hash = '';
   document.getElementById('select').selectedIndex = 0;
   updateLink();
@@ -581,6 +582,7 @@ async function fetchUsername() {
     return { success: true, username, status: 200 };
   } catch (e) {
     let status = e.status || e.response?.status || e.statusCode || e.code || 500;
+    usernameEl.placeholder = `Username not found (${status})`;
     return { success: false, error: e.message, status };
   }
 }
