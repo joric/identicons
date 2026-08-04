@@ -19,6 +19,19 @@
  * Config
  * ============================================================ */
 
+let editor = null;
+let defaultTitle = null;
+
+let hashChangeTimer = null;
+let autoFetchTimer = null;
+let lastFetchTime = null;
+
+const HASH_CHANGE_DEBOUNCE_MS = 250;
+const AUTO_FETCH_DEBOUNCE_MS = 1000;
+const SELECT_FETCH_DEBOUNCE_MS = 1000;
+
+const COLOR_MATCH_DELTA_THRESHOLD = 3; // max summed |dr|+|dg|+|db| to accept
+
 const GITHUB_USER_ESTIMATE = {
   date: new Date('2026-08-01'),
   count: 312018370,
@@ -45,12 +58,6 @@ const HASH_NIBBLES = {
 // Empirically relaxed mask for color-nibble matching: rgb<->hls rounding
 // means we can only reliably pin down the hue nibbles exactly.
 const RELAXED_COLOR_MASK = '1111111111111110000000000fc00000';
-
-const COLOR_MATCH_DELTA_THRESHOLD = 3; // max summed |dr|+|dg|+|db| to accept
-
-const USERNAME_FETCH_DEBOUNCE_MS = 500;
-
-let lastFetchTime = 0;
 
 /* ============================================================
  * Color utilities
@@ -394,11 +401,6 @@ const CanvasGrid = {
  * event handlers).
  * ============================================================ */
 
-let editor = null;
-let defaultTitle = null;
-let hashChangeTimer = null;
-const HASH_CHANGE_DEBOUNCE_MS = 250;
-
 function resetFields() {
   document.getElementById('username').value = '';
   document.getElementById('userid').value = '';
@@ -563,7 +565,7 @@ async function fetchID() {
 
 async function fetchUsername() {
   const now = Date.now();
-  if (now - lastFetchTime < USERNAME_FETCH_DEBOUNCE_MS) return { success: false, error: 'throttled', status: 429 };
+  if (now - lastFetchTime < SELECT_FETCH_DEBOUNCE_MS) return { success: false, error: 'throttled', status: 429 };
   lastFetchTime = now;
 
   const usernameEl = document.getElementById('username');
@@ -626,9 +628,13 @@ function onUserIdChangedDebounced() {
   window.location.hash = id;
   document.title = `${id} - ${defaultTitle}`;
   generate();
+
+  clearTimeout(autoFetchTimer);
+  //autoFetchTimer = setTimeout(fetchUsername, AUTO_FETCH_DEBOUNCE_MS);
 }
 
 function onUserIdInput() {
+  clearTimeout(autoFetchTimer);
   clearTimeout(hashChangeTimer);
   hashChangeTimer = setTimeout(onUserIdChangedDebounced, HASH_CHANGE_DEBOUNCE_MS);
 }
