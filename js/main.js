@@ -184,22 +184,25 @@ const IdenticonCodec = {
 const GitHubApi = {
   async getUserIdByUsername(username) {
     const url = `https://api.github.com/users/${username}`;
-    console.log('fetching id', url);
+    console.log('fetching', url);
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Could not fetch username (${res.status})`);
     const data = await res.json();
-    console.log('fetched username', username, 'id', data.id);
+    console.log('fetched id', data.id);
     return data.id;
   },
 
   async getUsernameById(id) {
-    const response = await fetch(`https://api.github.com/user/${id}`);
-    if (!response.ok) {
-      const error = new Error(`Could not fetch user (${response.status})`);
-      error.status = response.status;
+    let url = `https://api.github.com/user/${id}`;
+    console.log('fetching', url);
+    const res = await fetch(url);
+    if (!res.ok) {
+      const error = new Error(`Could not fetch user (${res.status})`);
+      error.status = res.status;
       throw error;
     }
-    const data = await response.json();
+    const data = await res.json();
+    console.log('fetched username', data.login);
     return data.login;
   },
 
@@ -565,7 +568,6 @@ async function fetchUsername() {
   const usernameEl = document.getElementById('username');
   const useridEl = document.getElementById('userid');
   const id = useridEl.value;
-  console.log('trying to fetch', id);
 
   try {
     const username = await GitHubApi.getUsernameById(id);
@@ -667,7 +669,7 @@ window.onload = function () {
           const result = await fetchUsername();
           if (result && result.success) {
             option.text = usernameEl.value = result.username;
-          } else {
+          } else if (result.status != 429) {
             option.text = `${id} [${result.status}]`;
           }
         })();
