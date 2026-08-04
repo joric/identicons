@@ -9,7 +9,7 @@
  * pattern and/or color (delegated to Web Workers for speed).
  *
  * External globals this file depends on (loaded elsewhere on the page):
- *   - md5(str)                     MD5 hashing
+ *   - md5(str)                      MD5 hashing
  *   - hsl2rgb(h, s, l)              HSL -> [r, g, b] (0..1 floats)
  *   - Identicon(hash, options)      GitHub-style identicon renderer
  *   - BitmapEditor.create(...)      5x5 pixel-grid editor bound to canvas
@@ -604,13 +604,17 @@ async function loadUserAndGenerate(username) {
 }
 
 function enforceRange(input) {
-  const min = parseFloat(input.min);
-  const max = parseFloat(input.max);
-  const value = parseFloat(input.value);
-  if (!isNaN(value)) {
-    if (value < min) input.value = min;
-    if (value > max) input.value = max;
-  }
+    const digits = input.value.replace(/\D/g, '');
+    if (digits === '') {
+        input.value = '';
+        return;
+    }
+    const num = parseInt(digits, 10);
+    const min = parseInt(input.min, 10);
+    const max = parseInt(input.max, 10);
+    if (num < min) input.value = String(min);
+    else if (num > max) input.value = String(max);
+    else input.value = digits;
 }
 
 async function random(e) {
@@ -630,7 +634,7 @@ function onUserIdChangedDebounced() {
   generate();
 
   clearTimeout(autoFetchTimer);
-  autoFetchTimer = setTimeout(fetchUsername, AUTO_FETCH_DEBOUNCE_MS); // comment out, if API limit is too low
+  //autoFetchTimer = setTimeout(fetchUsername, AUTO_FETCH_DEBOUNCE_MS); // comment out if API limit is too low
 }
 
 function onUserIdInput() {
