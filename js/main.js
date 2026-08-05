@@ -58,6 +58,7 @@ const HASH_NIBBLES = {
 // Empirically relaxed mask for color-nibble matching: rgb<->hls rounding
 // means we can only reliably pin down the hue nibbles exactly.
 const RELAXED_COLOR_MASK = '1111111111111110000000000fc00000';
+const RANDOM_COLOR_MASK  = '11111111111111100000000000000000';
 
 /* ============================================================
  * Color utilities
@@ -172,7 +173,9 @@ const IdenticonCodec = {
     // NOTE: a fully strict color mask doesn't work reliably because of
     // rgb<->hls rounding error; RELAXED_COLOR_MASK matches only the hue
     // nibbles exactly, which in practice is enough to disambiguate.
-    return [target, RELAXED_COLOR_MASK];
+    let blackColor = ColorUtils.isEqual(targetColor, {r:0, g:0, b:0});
+    let colorMask = blackColor ? RANDOM_COLOR_MASK : RELAXED_COLOR_MASK;
+    return [target, colorMask];
   },
 
   _hexToNibbles(hex) {
